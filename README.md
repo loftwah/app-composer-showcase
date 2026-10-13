@@ -13,3 +13,5 @@ Owner signs in at `/owner` with the runtime credential. Public browsing works wi
 Reviewed 13 October 2026. The app supplies saved reader dark/light themes, native app navigation with Ctrl/Cmd+K and ordinary links, visible keyboard focus, phone layouts, favicon/touch icon and page-specific social metadata. Original generated App Composer artwork is retained with its prompt; functional icons remain vectors. These features do not widen signup, owner access or disclosure permissions.
 
 Contributions: [Contributing](CONTRIBUTING.md), [Code of Conduct](CODE_OF_CONDUCT.md), [Security](SECURITY.md), [Accessibility](ACCESSIBILITY.md). Physical-device, screen-reader and full platform sharing acceptance remain distinct from browser checks.
+
+Public collections include search, photo/link filters, destination previews and a clear app explanation. Navigation uses original app thumbnails and retains Composer's theme/links when mounted; standalone themes remain app-owned. The invited studio and current-source visibility checks are unchanged. Review: 14 October 2026.
