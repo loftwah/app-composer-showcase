@@ -1,3 +1,4 @@
+import {health,publish,pageEvent,type PublisherEnv} from "./publisher.mjs";
 import {
   authorised,
   basePath,
@@ -15,7 +16,7 @@ import {
   text,
   type BaseEnv,
 } from "./common";
-interface Env extends BaseEnv {
+interface Env extends BaseEnv, PublisherEnv {
   ITEM_PROVIDER: Fetcher;
   PROVIDER_ORIGIN: string;
   PROVIDER_ID: string;
@@ -61,7 +62,7 @@ async function resolve(env: Env, c: any) {
     image: image.href,
   };
 }
-export default {
+const app = {
   async fetch(req: Request, env: Env): Promise<Response> {
     try {
       const u = new URL(req.url),
@@ -281,3 +282,10 @@ export default {
 } satisfies ExportedHandler<Env>;
 declare const BUILD_SHA: string;
 declare const MANIFEST: unknown;
+
+export default {async fetch(req:Request,env:Env,context:ExecutionContext){
+ const base=basePath(new URL(req.url),"showcase");
+ const probe=health(req,base+'/healthz',"showcase",BUILD_SHA);if(probe)return probe;
+ const response=await app.fetch(req,env);const event=pageEvent(req,response,base);
+ if(event)publish(env,context,req,event);return response;
+}} satisfies ExportedHandler<Env>;
