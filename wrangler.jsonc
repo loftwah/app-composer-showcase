@@ -1,0 +1,48 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "composer-showcase",
+  "account_id": "1003dc1d93af0ebea56b2f1252f89627",
+  "main": "./src/worker.ts",
+  "compatibility_date": "2026-10-13",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "workers_dev": true,
+  "routes": [
+    {
+      "pattern": "showcase.loftwah.com",
+      "custom_domain": true
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "composer-showcase",
+      "database_id": "c366203f-d880-4afc-a78e-d3e607146469",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 0.1
+  },
+  "vars": {
+    "PUBLIC_ORIGIN": "https://showcase.loftwah.com",
+    "PROVIDER_ORIGIN": "https://guestbook.loftwah.com"
+  },
+  "services": [
+    {
+      "binding": "ITEM_PROVIDER",
+      "service": "composer-guestbook"
+    }
+  ],
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+  "define": {
+    "BUILD_SHA": "\"uncommitted\"",
+    "MANIFEST": "{\"contract\": 1, \"id\": \"showcase\", \"name\": \"Good company\", \"version\": \"1.0.0\", \"repository\": \"https://github.com/loftwah/app-composer-showcase\", \"runtime\": \"cloudflare-worker\", \"entry\": \"src/worker.ts\", \"dataVersion\": 1, \"routes\": [\"/showcase\"], \"capabilities\": [\"items:read\", \"features:write\"], \"configuration\": {\"title\": {\"type\": \"string\", \"default\": \"Good company\", \"maxLength\": 80}, \"intro\": {\"type\": \"string\", \"default\": \"A few things we think you should see.\", \"maxLength\": 240}, \"theme\": {\"type\": \"select\", \"options\": [\"daylight\", \"midnight\"], \"default\": \"daylight\"}, \"layout\": {\"type\": \"select\", \"options\": [\"grid\", \"editorial\"], \"default\": \"grid\"}, \"maxItems\": {\"type\": \"integer\", \"min\": 1, \"max\": 8, \"default\": 8}}}"
+  }
+}
