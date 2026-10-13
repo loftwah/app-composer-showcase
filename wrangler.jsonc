@@ -43,8 +43,5 @@
     "binding": "ASSETS",
     "run_worker_first": true
   },
-  "define": {
-    "MANIFEST": "{\"contract\": 1, \"id\": \"showcase\", \"name\": \"Good company\", \"version\": \"1.0.0\", \"repository\": \"https://github.com/loftwah/app-composer-showcase\", \"runtime\": \"cloudflare-worker\", \"entry\": \"src/worker.ts\", \"dataVersion\": 1, \"routes\": [\"/showcase\"], \"capabilities\": [\"items:read\", \"features:write\"], \"configuration\": {\"title\": {\"type\": \"string\", \"default\": \"Good company\", \"maxLength\": 80}, \"intro\": {\"type\": \"string\", \"default\": \"A few things we think you should see.\", \"maxLength\": 240}, \"theme\": {\"type\": \"select\", \"options\": [\"daylight\", \"midnight\"], \"default\": \"daylight\"}, \"layout\": {\"type\": \"select\", \"options\": [\"grid\", \"editorial\"], \"default\": \"grid\"}}}"
-  },
   "preview_urls": false
 }
