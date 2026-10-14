@@ -1,8 +1,8 @@
 {
   "contract": 1,
   "id": "showcase",
-  "name": "Good company",
-  "version": "1.0.0",
+  "name": "Top shelf",
+  "version": "1.0.1",
   "repository": "https://github.com/loftwah/app-composer-showcase",
   "runtime": "cloudflare-worker",
   "entry": "src/worker.ts",
@@ -17,7 +17,7 @@
   "configuration": {
     "title": {
       "type": "string",
-      "default": "Good company",
+      "default": "Top shelf",
       "maxLength": 80
     },
     "intro": {
