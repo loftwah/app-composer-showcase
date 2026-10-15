@@ -97,3 +97,16 @@ test('owner API protects download/review/apply, enforces cookie origins and body
   assert.equal((await call('POST','x'.repeat(65537))).status,400);assert.equal((await call('POST','export default {}')).status,400);assert.equal(providerCalls,0);
  }finally{f.sqlite.close();}
 });
+test('file review controls appear only inside the authenticated studio, with inert comparison and no-script download',async()=>{
+ const f=fixture();try{
+  f.sqlite.prepare("UPDATE settings SET value='{}' WHERE id='presentation'").run();
+  for(const key of ['profile-tags-v1','profile-achievements-v1'])f.sqlite.prepare('UPDATE settings SET value=? WHERE id=?').run('{"version":1,"revision":0,"items":[]}',key);
+  globalThis.BUILD_SHA='f'.repeat(40);globalThis.MANIFEST={id:'showcase',contract:1};
+  const origin='https://showcase.example.test',env={DB:f.db,OWNER_API_TOKEN:'fictional-owner',PUBLIC_ORIGIN:origin,PROVIDER_ORIGIN:'https://guestbook.example.test',ITEM_PROVIDER:{async fetch(){return Response.json({contract:1,provider:'guestbook',items:[]});}}};
+  for(const [path,owner]of [['/owner',false],['/',false],['/showcase/owner',true]]){
+   const response=await worker.fetch(new Request(origin+path,{headers:owner?{Authorization:'Bearer fictional-owner'}:{}}),env,{waitUntil(){}});assert.equal(response.status,200);const html=await response.text();
+   if(!owner){assert.doesNotMatch(html,/id="profile-portability"|data-settings-comparison|FICTIONAL PRIVATE EXTENSION/);continue;}
+   assert.match(html,/href="\/showcase\/api\/profile-settings" download="linkarooie-profile.json"/);assert.match(html,/<section data-settings-comparison hidden/);assert.match(html,/data-apply-settings disabled/);assert.match(html,/aria-describedby="profile-settings-file-help"/);assert.match(html,/Reviewing saves nothing/);assert.doesNotMatch(html,/FICTIONAL PRIVATE EXTENSION/);
+  }
+ }finally{f.sqlite.close();}
+});
