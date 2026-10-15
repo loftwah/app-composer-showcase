@@ -1,3 +1,4 @@
+import {verifySharing} from './verify-sharing.mjs';
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 const git = (args) => execFileSync("git", args, { encoding: "utf8" }).trim();
@@ -46,4 +47,5 @@ for (let attempt = 0; attempt < 12; attempt++) {
   await new Promise((resolve) => setTimeout(resolve, 1500));
 }
 if (!verified) throw new Error("Live source identity did not converge");
+await verifySharing("https://showcase.loftwah.com");
 console.log("Verified live showcase " + sha);
