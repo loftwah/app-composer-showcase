@@ -48,3 +48,5 @@ Use softly rounded controls and media, thin borders and fixed functional SVG geo
 ## Do's and Don'ts
 
 Do extend these tokens, existing artwork, native interactions and both themes. Don't add an avatar/banner system, decorative icon imports, tracking claims or Linkarooie naming ahead of the coordinated identity release.
+
+Owner conflict recovery, reviewed 16 October 2026: the existing link editor retains unsaved fields after a refused save, then shows the current saved fields in a wrapping native definition list and two explicit recovery buttons. Use saved link focuses the title; Keep my edits focuses visibility for review. A failed private comparison keeps text and offers a read-only retry. Removed/replaced records remain copyable with saving blocked. This preserves the incumbent controls, theme surfaces and phone layout; it adds no remote preview or persistent private drafts.
