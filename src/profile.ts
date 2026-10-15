@@ -34,7 +34,7 @@ export function profileConfiguration(input:Record<string,unknown>,previous:Recor
     }else{
       if(!value){result[field.key]='';continue;}
       let url:URL;try{url=new URL(value);}catch{throw Error('Use a full HTTPS address for '+field.label+'.');}
-      if(url.protocol!=='https:'||url.username||url.password||hosts[field.key]&&!hosts[field.key].includes(url.hostname))throw Error('Use an HTTPS '+field.label+' address without embedded credentials.');
+      if(url.href.length>field.maxLength||url.protocol!=='https:'||url.username||url.password||hosts[field.key]&&!hosts[field.key].includes(url.hostname))throw Error('Use an HTTPS '+field.label+' address without embedded credentials.');
       result[field.key]=url.href;
     }
   }

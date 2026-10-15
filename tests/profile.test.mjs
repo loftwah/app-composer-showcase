@@ -14,7 +14,7 @@ function fixture(){const db=database();globalThis.BUILD_SHA='f'.repeat(40);globa
 test('profile validates safe social identities and older clients preserve authored optional fields',()=>{
  const previous={...cfg,ownerExtension:'retained'};assert.deepEqual(profileConfiguration(cfg,previous),previous);
  const legacy={title:'Changed name',intro:'Changed bio',theme:'daylight',layout:'grid'};const next=profileConfiguration(legacy,previous);assert.equal(next.handle,cfg.handle);assert.equal(next.github,cfg.github);assert.equal(next.ownerExtension,'retained');assert.equal(next.title,'Changed name');assert.equal(profileConfiguration({...cfg,github:''}).github,'');
- for(const patch of [{handle:'<script>'},{github:'https://example.test/spoof'},{website:'javascript:alert(1)'},{website:'https://user:password@example.test'},{linkedin:'https://linkedin.com.evil.test/'},{theme:['midnight']},{layout:['compact']},{website:17}])assert.throws(()=>profileConfiguration({...cfg,...patch}));
+ for(const patch of [{handle:'<script>'},{github:'https://example.test/spoof'},{website:'javascript:alert(1)'},{website:'https://user:password@example.test'},{linkedin:'https://linkedin.com.evil.test/'},{theme:['midnight']},{layout:['compact']},{website:17},{website:'https://example.test/'+ 'é'.repeat(600)}])assert.throws(()=>profileConfiguration({...cfg,...patch}));
 });
 test('bounded decorations are escaped fixed icons and stable pinned-first order preserves authored positions',()=>{
  const cards=[{id:'one',position:0},{id:'two',position:1},{id:'three',position:2}];const styles=presentation({two:{pinned:true,icon:'book'},three:{pinned:true,icon:'code'}});assert.deepEqual(decorateCards(cards,styles).map(c=>c.id),['two','three','one']);assert.deepEqual(decorateCards(cards,styles,false).map(c=>c.id),['one','two','three']);assert.deepEqual(cards.map(c=>c.id),['one','two','three']);assert.match(icon('<script>'),/<svg/);assert.doesNotMatch(icon('<script>'),/<script>/);for(const value of [{pinned:'true',icon:'link'},{pinned:false,icon:'<svg onload=evil()>'},{pinned:false,icon:'link',html:'unsafe'}])assert.throws(()=>decoration(value));assert.throws(()=>presentation({'bad.path':{pinned:false,icon:'link'}}));
@@ -63,5 +63,12 @@ test('concurrent removal cannot recreate orphan presentation or disable a full c
   assert.equal((await f.request('/api/cards',{id:ids[0],delete:true})).status,200);release();assert.equal((await pending).status,404);f.DB.prepare=prepare;
   const replacement=await(await f.request('/api/cards',{title:'Replacement fictional link',url:'https://example.test/replacement',status:'published'})).json();assert.equal((await f.request('/api/presentation',{id:replacement.id,pinned:true,icon:'heart'})).status,200);
   const styles=JSON.parse(f.sqlite.prepare("SELECT value FROM settings WHERE id='presentation'").get().value);assert.equal(Object.keys(styles).length,8);assert.equal(Object.hasOwn(styles,ids[0]),false);assert.equal((await f.request('/api/cards',null,false)).status,200);assert.equal((await f.request('/',null,false)).status,200);assert.equal((await f.request('/api/export')).status,200);
+ }finally{f.sqlite.close();}
+});
+
+test('the bounded configuration API accepts all four maximum-sized canonical social links',async()=>{
+ const f=fixture();try{
+  const long=base=>base+'x'.repeat(2048-base.length);const input={...cfg,website:long('https://example.test/'),github:long('https://github.com/'),bluesky:long('https://bsky.app/'),linkedin:long('https://linkedin.com/')};
+  assert(JSON.stringify(input).length>8192);const res=await f.request('/api/config',input);assert.equal(res.status,200);const body=await res.json();assert.equal(body.config.linkedin.length,2048);assert.equal((await f.request('/',null,false)).status,200);
  }finally{f.sqlite.close();}
 });

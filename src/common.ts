@@ -237,7 +237,7 @@ export async function commonAPI(
   if (path === "/api/config") {
     if (!(await authorised(req, env, name)))
       return error("Owner sign-in required", 401);
-    const b = await readJSON(req);
+    const b = await readJSON(req,16384);
     const c = profileConfiguration(b,await settings(env,{}));
     await env.DB.prepare(
       "INSERT INTO settings(id,value) VALUES('config',?) ON CONFLICT(id) DO UPDATE SET value=excluded.value",
