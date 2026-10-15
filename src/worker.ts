@@ -3,6 +3,7 @@ import {achievementStudio,publicAchievements} from './achievement-view.ts';
 import {AchievementError,readAchievements,changeAchievements} from './achievements.ts';
 import {TagError,readTags,changeTags} from './tags.ts';
 import {publicTags,tagStudio} from './tag-view.ts';
+import {ProfilePortabilityError,exportProfileSettings,changeProfileSettings} from './profile-portability.ts';
 import {health,publish,pageEvent,type PublisherEnv} from "./publisher.mjs";
 import {
   authorised,
@@ -84,6 +85,13 @@ const app = {
       const owner = await authorised(req, env, "showcase_session");
       const common = await commonAPI(req, env, path, base, "showcase_session");
       if (common) return common;
+      if(path==='/api/profile-settings'){
+        if(!['GET','POST'].includes(req.method))return new Response(null,{status:405,headers:{Allow:'GET, POST','Cache-Control':'no-store'}});
+        if(!owner)return error('Owner sign-in required',401);
+        if(req.method==='GET')return new Response(JSON.stringify(await exportProfileSettings(env.DB,defaults)),{headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Content-Disposition':'attachment; filename="linkarooie-profile.json"'}});
+        if(req.headers.get('Origin')!==u.origin&&!req.headers.get('Authorization'))return error('Write origin is not authorised',403);
+        return json(await changeProfileSettings(env.DB,await readJSON(req,65536),defaults));
+      }
       if(path==='/api/tags'){
         if(req.method==='GET')return json({contract:1,tags:(await readTags(env.DB)).collection.items.filter(item=>item.status==='published')});
         if(req.method!=='POST')return new Response(null,{status:405,headers:{Allow:'GET, POST','Cache-Control':'no-store'}});
@@ -339,7 +347,7 @@ const app = {
         return env.ASSETS.fetch(new Request(u.origin + path, req));
       return error("Page not found", 404);
     } catch (e) {
-      if(e instanceof AchievementError||e instanceof TagError)return error(e.message,e.status);
+      if(e instanceof AchievementError||e instanceof TagError||e instanceof ProfilePortabilityError)return error(e.message,e.status);
       return error(e instanceof Error ? e.message : "Request failed", 400);
     }
   },

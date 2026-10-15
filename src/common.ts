@@ -1,4 +1,5 @@
 import {profileConfiguration,profileFields} from './profile.ts';
+import {replaceCollectionSetting} from './settings-collection.ts';
 export interface BaseEnv {
   DB: D1Database;
   OWNER_API_TOKEN: string;
@@ -240,12 +241,20 @@ export async function commonAPI(
     if (!(await authorised(req, env, name)))
       return error("Owner sign-in required", 401);
     const b = await readJSON(req,16384);
-    const c = profileConfiguration(b,await settings(env,{}));
-    await env.DB.prepare(
-      "INSERT INTO settings(id,value) VALUES('config',?) ON CONFLICT(id) DO UPDATE SET value=excluded.value",
-    )
-      .bind(JSON.stringify({ ...(await settings(env, {})), ...c }))
-      .run();
+    let raw:string|null,previous:Record<string,unknown>;
+    try{
+      const row=await env.DB.prepare("SELECT value FROM settings WHERE id='config'").first<{value:string}>();
+      raw=row?.value??null;
+      if(raw!==null&&(typeof raw!=='string'||new TextEncoder().encode(raw).byteLength>65536))throw Error();
+      previous=raw===null?{}:JSON.parse(raw);
+      if(!previous||typeof previous!=='object'||Array.isArray(previous))throw Error();
+    }catch{return error('Saved profile settings need owner review or the connection is unavailable. Nothing was changed.',503);}
+    const c = profileConfiguration(b,previous),bytes=JSON.stringify(c);
+    if(new TextEncoder().encode(bytes).byteLength>65536)return error('Saved profile settings need owner review. Nothing was changed.',503);
+    let saved;
+    try{saved=await replaceCollectionSetting(env.DB,'config',raw,bytes);}
+    catch{return error('The settings save could not be confirmed. Read the saved settings before trying again.',503);}
+    if(!saved)return error('Profile settings changed. Refresh and compare before saving again.',409);
     return json({ ok: true, config: c });
   }
   return null;
