@@ -1,3 +1,4 @@
+import {setupAchievements} from './achievements-studio.js';
 // Owner-only native controls. Preview uses text nodes and never fetches a destination.
 const cards = document.querySelector('#cards');
 if (cards) {
@@ -15,7 +16,7 @@ if (cards) {
   const reloadSaved=()=>{busy=false;location.reload();};
   const lock=()=>{
     if(busy)return null;busy=true;
-    const controls=new Map([...document.querySelectorAll('#cards,#manual,#feature')].flatMap(container=>[...container.querySelectorAll('button,input,textarea,select')]).map(control=>[control,control.disabled]));
+    const controls=new Map([...document.querySelectorAll('#cards,#manual,#feature,#achievement-studio')].flatMap(container=>[...container.querySelectorAll('button,input,textarea,select')]).map(control=>[control,control.disabled]));
     controls.forEach((_,control)=>{control.disabled=true;});
     return ()=>{busy=false;controls.forEach((disabled,control)=>{control.disabled=disabled||control.dataset.conflicted==='true';});};
   };
@@ -30,6 +31,7 @@ if (cards) {
     return value;
   }
   const message = error => { output.textContent = error.message || String(error); };
+  setupAchievements({base,watch,lock,request,isBusy:()=>busy});
   for (const [id, status] of [['manual', 'draft'], ['feature', 'published']]) {
     const entry=document.querySelector('#'+id);
     watch(entry,id==='manual'?['title','description','url']:['item']);
