@@ -1,6 +1,6 @@
 # Profile and link presentation provenance
 
-Reviewed 15 October 2026. App Composer issue #25 is the product direction. The current public Top shelf identity remains until a coordinated catalogue/editor/launcher/navigation/SEO release; repository, app and route IDs stay `showcase`.
+Reviewed 15 October 2026. App Composer issue #25 is the product direction. Linkarooie replaces the historical Top shelf public app name through a coordinated catalogue/editor/launcher/navigation/SEO release. Existing owner titles remain authored configuration; repository, app and route IDs stay `showcase`. No resource, domain, content or licence migration is involved.
 
 | Reference | Exact revision | Use here |
 | --- | --- | --- |

@@ -1,4 +1,4 @@
-# Top shelf
+# Linkarooie
 
 An original, independently deployable showcase mini-app. MIT. Reviewed 13 October 2026.
 
