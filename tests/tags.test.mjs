@@ -71,3 +71,10 @@ test('Escape closes only the active tag and returns focus to its native summary'
  callbacks[0]({key:'Escape',preventDefault(){prevented++;}});assert.equal(details.open,false);assert.equal(summary.focused,1);assert.equal(prevented,1);
  callbacks[0]({key:'Escape',preventDefault(){prevented++;}});assert.equal(summary.focused,1);assert.equal(prevented,1);
 });
+test('bounded tag API accepts both maximum-sized canonical references and maximum optional text together',async()=>{
+ const{sqlite,db}=fixture();try{
+  globalThis.BUILD_SHA='f'.repeat(40);globalThis.MANIFEST={id:'showcase',contract:1};const origin='https://showcase.example.test',env={DB:db,OWNER_API_TOKEN:'fictional-owner',PUBLIC_ORIGIN:origin};
+  const url='https://example.test/'+'\\'.repeat(2048-'https://example.test/'.length),item=entry({label:'é'.repeat(40),description:'é'.repeat(240),citationURL:url,relatedURL:url,citationLabel:'é'.repeat(100),relatedLabel:'é'.repeat(100)});assert.equal(tagFields(item).citationURL.length,2048);
+  const body=JSON.stringify({action:'create',expectedRevision:0,item});assert(new TextEncoder().encode(body).length>8192);const response=await worker.fetch(new Request(origin+'/api/tags',{method:'POST',headers:{Authorization:'Bearer fictional-owner',Origin:origin,'Content-Type':'application/json'},body}),env,{waitUntil(){}});assert.equal(response.status,201);const exported=(await readTags(db)).collection;assert.equal(exported.items[0].citationURL,tagFields(item).citationURL);assert.equal(exported.items[0].relatedURL.length,2048);
+ }finally{sqlite.close();}
+});

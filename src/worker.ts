@@ -89,7 +89,7 @@ const app = {
         if(req.method!=='POST')return new Response(null,{status:405,headers:{Allow:'GET, POST','Cache-Control':'no-store'}});
         if(!owner)return error('Owner sign-in required',401);
         if(req.headers.get('Origin')!==u.origin&&!req.headers.get('Authorization'))return error('Write origin is not authorised',403);
-        const command=await readJSON(req),saved=await changeTags(env.DB,command);
+        const command=await readJSON(req,16384),saved=await changeTags(env.DB,command);
         return json({ok:true,...saved},command.action==='create'?201:200);
       }
       if(path==='/api/achievements'){
