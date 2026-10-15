@@ -1,3 +1,4 @@
+import {profileConfiguration,profileFields} from './profile.ts';
 export interface BaseEnv {
   DB: D1Database;
   OWNER_API_TOKEN: string;
@@ -156,6 +157,8 @@ header{gap:16px 24px}header nav{gap:8px 20px}header nav a{display:inline-flex;al
 @media(max-width:820px){.collection-hero{grid-template-columns:1fr;gap:28px;padding-top:12px;padding-bottom:28px}.collection-hero h1{max-width:20ch;font-size:clamp(2.5rem,7vw,3.8rem)}.collection-hero .lede{max-width:52ch}.collection-hero figure{max-width:680px}.collection-heading{align-items:flex-start;flex-direction:column;gap:8px;margin-top:28px}.collection-empty{padding:24px}}
 
 #cards>article{padding:24px 0;border-top:1px solid var(--border)}#cards h3{margin:0 0 8px;overflow-wrap:anywhere}.card-editor{max-width:680px;margin:16px 0}.card-editor summary{cursor:pointer;min-height:44px;padding:8px 0;font-weight:600}.card-editor form{margin:12px 0 24px}.card-editor label{font-size:14px}.card-editor input,.card-editor textarea,.card-editor select{max-width:none}.card-actions{margin-top:16px}.card-draft-preview{background:var(--surface);border:1px solid var(--border);padding:24px;margin-top:20px;border-radius:8px}.card-draft-preview p{margin:0 0 16px}.card-draft-preview a{display:flex;flex-direction:column;gap:8px;text-decoration:none;overflow-wrap:anywhere}.card-draft-preview a strong{font:600 22px/1.3 Space,system-ui}.card-draft-preview a small{color:var(--muted)}button:disabled{opacity:.6;cursor:wait}
+.profile-handle{color:var(--accent);font-size:16px;margin:-10px 0 20px;overflow-wrap:anywhere}.profile-social{display:flex;gap:8px 20px;flex-wrap:wrap;margin:0 0 22px}.profile-social a{display:inline-flex;align-items:center;gap:6px;min-height:44px;font-size:14px}.profile-social svg{width:15px;height:15px}.profile-share{margin-top:20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.profile-share button{font-size:14px;padding:9px 14px;min-height:44px}.profile-share p{flex-basis:100%;margin:0;font-size:14px;color:var(--muted)}.profile-share p:empty{display:none}.profile-share label{width:100%;font-size:14px}.profile-share input{max-width:none}.link-symbol{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--accent)}.gallery.compact{display:flex;flex-direction:column;gap:0;max-width:820px}.gallery.compact article{border-bottom:1px solid var(--border);padding:0}.compact-link{display:flex!important;gap:18px;align-items:center;padding:24px 0;text-decoration:none}.compact-link:hover .compact-title{text-decoration:underline;text-underline-offset:5px}.compact-copy{display:flex;flex-direction:column;gap:8px;min-width:0;flex:1;overflow-wrap:anywhere}.compact-title{font:500 24px/1.3 Space,system-ui}.compact-description{font:16px/1.5 system-ui;color:var(--muted)}.compact-destination{font-size:13px;color:var(--muted)}.link-direction{display:flex;flex-shrink:0;color:var(--muted)}.profile-check{display:flex;gap:10px;align-items:center;min-height:44px}.profile-check input{width:20px;height:20px;flex-shrink:0;margin:0;accent-color:var(--accent)}[data-presentation-card]{max-width:440px;margin:18px 0}[data-presentation-card]>label{font-size:14px}[data-presentation-card] select{max-width:220px}[data-presentation-card] p{font-size:14px;color:var(--muted)}[data-presentation-card] p:empty{display:none}@media(max-width:600px){.compact-link{gap:14px;padding:22px 0}.compact-title{font-size:21px}.compact-description{font-size:15px}.profile-social{gap:8px 16px}.profile-share{align-items:flex-start}.profile-share button{flex:none}}
+
 `;
 export function html(
   title: string,
@@ -191,7 +194,7 @@ export function client(base: string, cookie: string) {
   return `<script>const base=${JSON.stringify(base)};const output=document.querySelector('main [role=status]');async function api(path,data){const res=await fetch(base+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});const value=await res.json();if(!res.ok)throw new Error(value.error||'Request failed');return value;}function report(e){if(output)output.textContent=e.message||e;}document.querySelector('#login')?.addEventListener('submit',async e=>{e.preventDefault();try{await api('/api/login',{token:new FormData(e.target).get('token')});location.reload();}catch(e){report(e);}});document.querySelector('#logout')?.addEventListener('click',async()=>{try{await api('/api/logout',{});location.reload();}catch(e){report(e);}});document.querySelector('#config')?.addEventListener('submit',async e=>{e.preventDefault();try{await api('/api/config',Object.fromEntries(new FormData(e.target)));location.reload();}catch(e){report(e);}});</script>`;
 }
 export function configForm(c: Record<string, any>) {
-  return `<form id="config"><fieldset><legend>Make it yours</legend><label>Title<input name="title" maxlength="80" value="${escape(c.title)}" required></label><label>Introduction<textarea name="intro" maxlength="240">${escape(c.intro)}</textarea></label><label>Theme<select name="theme"><option ${c.theme === "daylight" ? "selected" : ""}>daylight</option><option ${c.theme === "midnight" ? "selected" : ""}>midnight</option></select></label><label>Layout<select name="layout"><option ${c.layout === "grid" ? "selected" : ""}>grid</option><option ${c.layout === "editorial" ? "selected" : ""}>editorial</option></select></label><button>Save configuration</button></fieldset></form>`;
+  return `<form id="config"><fieldset><legend>Make it yours</legend><label>Title<input name="title" maxlength="80" value="${escape(c.title)}" required></label><label>Introduction<textarea name="intro" maxlength="240">${escape(c.intro)}</textarea></label><label>Theme<select name="theme"><option ${c.theme === "daylight" ? "selected" : ""}>daylight</option><option ${c.theme === "midnight" ? "selected" : ""}>midnight</option></select></label><label>Layout<select name="layout"><option ${c.layout === "grid" ? "selected" : ""}>grid</option><option ${c.layout === "editorial" ? "selected" : ""}>editorial</option><option ${c.layout === "compact" ? "selected" : ""}>compact</option></select></label><details><summary>Profile &amp; social links</summary><p class="small">Your title is the profile name and your introduction is its bio. Empty social links stay out of the public page.</p>${profileFields.map(field=>`<label>${field.label}<input name="${field.key}" ${field.key==='handle'?'':'type="url" pattern="https://.*"'} maxlength="${field.maxLength}" value="${escape(c[field.key]??'')}" ${field.key==='handle'?'placeholder="your-handle"':'placeholder="https://"'}></label>`).join('')}</details><button>Save configuration</button></fieldset></form>`;
 }
 export async function commonAPI(
   req: Request,
@@ -235,12 +238,7 @@ export async function commonAPI(
     if (!(await authorised(req, env, name)))
       return error("Owner sign-in required", 401);
     const b = await readJSON(req);
-    const c = {
-      title: text(b.title, 80),
-      intro: text(b.intro),
-      theme: ["daylight", "midnight"].includes(b.theme) ? b.theme : "daylight",
-      layout: ["grid", "editorial"].includes(b.layout) ? b.layout : "grid",
-    };
+    const c = profileConfiguration(b,await settings(env,{}));
     await env.DB.prepare(
       "INSERT INTO settings(id,value) VALUES('config',?) ON CONFLICT(id) DO UPDATE SET value=excluded.value",
     )

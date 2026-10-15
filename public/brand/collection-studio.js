@@ -89,3 +89,17 @@ if (cards) {
     }
   });
 }
+// Link presentation is saved independently from card content and visibility.
+for(const form of document.querySelectorAll('[data-presentation-card]')){
+ form.addEventListener('submit',async event=>{
+  event.preventDefault();const button=form.querySelector('button'),output=form.querySelector('[role=status]');
+  const data=new FormData(form),base=document.querySelector('#cards').dataset.base;
+  button.disabled=true;
+  try{
+   const response=await fetch(base+'/api/presentation',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:form.closest('[data-card]').dataset.card,pinned:data.has('pinned'),icon:data.get('icon')})});
+   const result=await response.json();if(!response.ok)throw Error(result.error||'Could not save the link style.');
+   output.textContent='Link style saved. Content and visibility are unchanged.';
+  }catch(error){output.textContent=error.message||'Could not save the link style. Your selections are kept here.';}
+  finally{button.disabled=false;}
+ });
+}
