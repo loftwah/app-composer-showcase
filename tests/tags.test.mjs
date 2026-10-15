@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import{DatabaseSync}from'node:sqlite';import{readFileSync}from'node:fs';
-import{readTags,changeTags}from'../src/tags.ts';import{changeAchievements,readAchievements}from'../src/achievements.ts';import{tagFields,tagHasContext}from'../public/brand/profile-tag-fields.mjs';import worker from'../src/worker.ts';
+import{readTags,changeTags,tagCollectionByteLimit}from'../src/tags.ts';import{changeAchievements,readAchievements}from'../src/achievements.ts';import{tagFields,tagHasContext}from'../public/brand/profile-tag-fields.mjs';import worker from'../src/worker.ts';
 import{publicTags}from'../src/tag-view.ts';import{runInNewContext}from'node:vm';
 const entry=(patch={})=>({label:'Fictional tool',description:'',citationLabel:'',citationURL:'',relatedLabel:'',relatedURL:'',status:'draft',...patch});
 function fixture(){const sqlite=new DatabaseSync(':memory:');sqlite.exec(readFileSync(new URL('../migrations/0001.sql',import.meta.url),'utf8'));const statement=(sql,values=[])=>({bind(...next){return statement(sql,next)},async first(){return sqlite.prepare(sql).get(...values)??null},async all(){return{results:sqlite.prepare(sql).all(...values)}},async run(){sqlite.prepare(sql).run(...values);return{success:true}}});return{sqlite,db:{prepare:statement}};}
@@ -76,5 +76,11 @@ test('bounded tag API accepts both maximum-sized canonical references and maximu
   globalThis.BUILD_SHA='f'.repeat(40);globalThis.MANIFEST={id:'showcase',contract:1};const origin='https://showcase.example.test',env={DB:db,OWNER_API_TOKEN:'fictional-owner',PUBLIC_ORIGIN:origin};
   const url='https://example.test/'+'\\'.repeat(2048-'https://example.test/'.length),item=entry({label:'é'.repeat(40),description:'é'.repeat(240),citationURL:url,relatedURL:url,citationLabel:'é'.repeat(100),relatedLabel:'é'.repeat(100)});assert.equal(tagFields(item).citationURL.length,2048);
   const body=JSON.stringify({action:'create',expectedRevision:0,item});assert(new TextEncoder().encode(body).length>8192);const response=await worker.fetch(new Request(origin+'/api/tags',{method:'POST',headers:{Authorization:'Bearer fictional-owner',Origin:origin,'Content-Type':'application/json'},body}),env,{waitUntil(){}});assert.equal(response.status,201);const exported=(await readTags(db)).collection;assert.equal(exported.items[0].citationURL,tagFields(item).citationURL);assert.equal(exported.items[0].relatedURL.length,2048);
+ }finally{sqlite.close();}
+});
+test('all twelve maximum serialized tags fit the bounded row and remain readable',async()=>{
+ const{sqlite,db}=fixture();try{
+  const prefix='https://example.test/?q=',url=prefix+'\\'.repeat(2048-prefix.length),unit='\ud800',item=entry({label:unit.repeat(40),description:unit.repeat(240),citationURL:url,relatedURL:url,citationLabel:unit.repeat(100),relatedLabel:unit.repeat(100)});assert.equal(tagFields(item).citationURL,url);
+  let saved;for(let n=0;n<12;n++)saved=await changeTags(db,{action:'create',expectedRevision:n,item});assert.equal(saved.collection.items.length,12);const row=sqlite.prepare("SELECT value FROM settings WHERE id='profile-tags-v1'").get(),bytes=new TextEncoder().encode(row.value).length;assert(bytes>128*1024,'Exercise the reviewed worst-case serialized escape expansion');assert(bytes<tagCollectionByteLimit);assert.deepEqual((await readTags(db)).collection,saved.collection);
  }finally{sqlite.close();}
 });

@@ -3,6 +3,9 @@ import {replaceCollectionSetting} from './settings-collection.ts';
 export type {ProfileTag,TagCollection};
 export {tagLimit};
 const key='profile-tags-v1';
+// Twelve maximum records, including six-byte JSON escapes for lone UTF-16
+// units and escaped backslashes retained in canonical HTTPS queries, fit here.
+export const tagCollectionByteLimit=160*1024;
 const uuid=(value:unknown):value is string=>typeof value==='string'&&/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(value);
 export class TagError extends Error{status:number;constructor(message:string,status=400){super(message);this.status=status;}}
 const object=(value:unknown,keys:string[])=>{if(!exactTagObject(value,keys))throw new TagError('Use the supported tag fields.');return value;};
@@ -10,7 +13,7 @@ export const parseTagCollection=tagCollection;
 export async function readTags(db:D1Database):Promise<{raw:string|null;collection:TagCollection}>{
  let row:{value:string}|null;try{row=await db.prepare('SELECT value FROM settings WHERE id=?').bind(key).first<{value:string}>();}catch{throw new TagError('Tags are unavailable. Refresh to check the connection.',503);}
  if(!row)return{raw:null,collection:{version:1,revision:0,items:[]}};
- try{if(typeof row.value!=='string'||new TextEncoder().encode(row.value).byteLength>65536)throw Error();return{raw:row.value,collection:parseTagCollection(JSON.parse(row.value))};}catch{throw new TagError('Saved tags need owner review. Nothing was changed.',503);}
+ try{if(typeof row.value!=='string'||new TextEncoder().encode(row.value).byteLength>tagCollectionByteLimit)throw Error();return{raw:row.value,collection:parseTagCollection(JSON.parse(row.value))};}catch{throw new TagError('Saved tags need owner review. Nothing was changed.',503);}
 }
 export async function changeTags(db:D1Database,input:unknown){
  if(!input||typeof input!=='object'||Array.isArray(input))throw new TagError('Choose a tag action.');
@@ -33,7 +36,7 @@ export async function changeTags(db:D1Database,input:unknown){
   else if(action==='delete')items.splice(index,1);
   else{if(!['draft','published','hidden'].includes(command.status as string))throw new TagError('Choose a supported visibility.');items[index].status=command.status as ProfileTag['status'];}
  }
- const next:TagCollection={version:1,revision:collection.revision+1,items},bytes=JSON.stringify(next);if(new TextEncoder().encode(bytes).byteLength>65536)throw new TagError('The tag list exceeds its supported size.');
+ const next:TagCollection={version:1,revision:collection.revision+1,items},bytes=JSON.stringify(next);if(new TextEncoder().encode(bytes).byteLength>tagCollectionByteLimit)throw new TagError('The tag list exceeds its supported size.');
  let saved:{value:string}|null;try{saved=await replaceCollectionSetting(db,key,raw,bytes);}catch{throw new TagError('The save could not be confirmed. Refresh tags before retrying.',503);}
  if(!saved)throw new TagError('Tags changed. Refresh and compare before saving again.',409);
  return{collection:next,id};

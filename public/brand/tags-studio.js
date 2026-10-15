@@ -15,6 +15,7 @@ export function setupTags({base,watch,lock,request,isBusy}){
   for(const control of studio.querySelectorAll('button,input,textarea,select'))control.disabled=pending;
   form.elements.namedItem('status').disabled=pending||!selected;
   for(const help of form.querySelectorAll('[data-tag-help]')){const field=help.dataset.tagHelp,invalid=show&&checked.error?.field===field;help.textContent=invalid?checked.error.message:'';form.elements.namedItem(field).setAttribute('aria-invalid',String(invalid));}
+  const referenceProblem=show&&['citationURL','citationLabel','relatedURL','relatedLabel'].includes(checked.error?.field);form.querySelector('[data-tag-reference-error]').textContent=referenceProblem?checked.error.message:'';if(referenceProblem)form.querySelector('.tag-references').open=true;
   save.disabled=pending||blocked||!!checked.error||(!selected&&collection.items.length>=tagLimit);save.dataset.conflicted=String(blocked);previewButton.disabled=pending||!!checked.error;
   save.textContent=selected?(values().status==='published'?'Save published changes':'Save tag'):'Save draft';
   studio.querySelector('[data-save-help]').textContent=selected?(values().status==='published'?'Saving publishes these changes immediately.':'Draft and hidden tags stay out of your public profile.'):'New tags are saved as private drafts.';

@@ -61,3 +61,13 @@ Owner `POST /api/achievements` accepts `action` (`create`, `edit`, `visibility`,
 ## Public sharing and link presentation
 
 MP direction, 16 October 2026: links use no underlines and retain visible keyboard focus. Page, Open Graph and X titles/descriptions agree; the app serves an explicit large-image card with dimensions, type and alt text. The normal release checks live public HTML and JPEG dimensions with a marked Twitterbot user-agent probe. Actual X rendering is a separate observation; a probe alone does not establish it.
+
+## Tags with useful context
+
+A profile can hold up to twelve short tags independently of its cards and milestones. Plain labels remain text. Optional explanation, source and related-work links use native disclosures that work by touch and keyboard without hover; Escape closes the active tag and returns focus to its summary. All content is escaped text, and references require HTTPS without embedded credentials. No destination is fetched for preview, citation verification or decoration; an authored source link is not a verified factual claim.
+
+The owner studio uses one inline tag editor with private drafts, explicit publishing/hiding, stable ordering, retained edits and saved-version comparison. Reference validation remains visible outside the optional reference disclosure, including restored edits. Saving published changes takes effect immediately. The existing mutation lock and unload protection cover tags too; private drafts are never persisted in browser storage.
+
+Owner `POST /api/tags` accepts `create`, `edit`, `visibility`, `reorder` or `delete`, the current `expectedRevision` and only the action's supported fields. Commands are bounded at 16 KiB; the versioned app-owned settings row is bounded at 160 KiB to accommodate all twelve maximum-sized records, including JSON escaping. Labels are at most 40 characters, explanations 240, reference labels 100 and each canonical HTTPS URL 2,048. Exact-byte atomic comparison refuses competing first saves and stale changes without overwriting cards, settings or milestones. Public `GET /api/tags` and homepage HTML expose only published tags. Private export adds `tagCollection` version 1; malformed saved data reports `tagProblem: review_required` while preserving it and keeping other content exportable. No new database, migration or provider is introduced. Manifest `tagCollection` version 1 advertises the reviewed bounded context; native Composer controls remain off for older source pins.
+
+These source additions are under qualification. Unit/type checks do not establish browser, finish-review, composition activation or production acceptance; final release identities belong in App Composer #11.
