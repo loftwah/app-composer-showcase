@@ -1,0 +1,312 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-15T18:37:23.983883+00:00",
+  "title": "Design System: Linkarooie",
+  "extensions": {
+    "colorMeta": {
+      "charcoal": {
+        "role": "neutral",
+        "displayName": "Charcoal",
+        "canonical": "#17181b",
+        "tonalRamp": [
+          "oklch(15% 0.0061 271.12)",
+          "oklch(26.4% 0.0061 271.12)",
+          "oklch(37.9% 0.0061 271.12)",
+          "oklch(49.3% 0.0061 271.12)",
+          "oklch(60.7% 0.0061 271.12)",
+          "oklch(72.1% 0.0061 271.12)",
+          "oklch(83.6% 0.0061 271.12)",
+          "oklch(95% 0.0061 271.12)"
+        ]
+      },
+      "dark-text": {
+        "role": "neutral",
+        "displayName": "Dark Text",
+        "canonical": "#f2f3f5",
+        "tonalRamp": [
+          "oklch(15% 0.0029 264.54)",
+          "oklch(26.4% 0.0029 264.54)",
+          "oklch(37.9% 0.0029 264.54)",
+          "oklch(49.3% 0.0029 264.54)",
+          "oklch(60.7% 0.0029 264.54)",
+          "oklch(72.1% 0.0029 264.54)",
+          "oklch(83.6% 0.0029 264.54)",
+          "oklch(95% 0.0029 264.54)"
+        ]
+      },
+      "dark-muted": {
+        "role": "neutral",
+        "displayName": "Dark Muted",
+        "canonical": "#afb3bb",
+        "tonalRamp": [
+          "oklch(15% 0.0122 264.49)",
+          "oklch(26.4% 0.0122 264.49)",
+          "oklch(37.9% 0.0122 264.49)",
+          "oklch(49.3% 0.0122 264.49)",
+          "oklch(60.7% 0.0122 264.49)",
+          "oklch(72.1% 0.0122 264.49)",
+          "oklch(83.6% 0.0122 264.49)",
+          "oklch(95% 0.0122 264.49)"
+        ]
+      },
+      "dark-surface": {
+        "role": "neutral",
+        "displayName": "Dark Surface",
+        "canonical": "#23252a",
+        "tonalRamp": [
+          "oklch(15% 0.0098 268.31)",
+          "oklch(26.4% 0.0098 268.31)",
+          "oklch(37.9% 0.0098 268.31)",
+          "oklch(49.3% 0.0098 268.31)",
+          "oklch(60.7% 0.0098 268.31)",
+          "oklch(72.1% 0.0098 268.31)",
+          "oklch(83.6% 0.0098 268.31)",
+          "oklch(95% 0.0098 268.31)"
+        ]
+      },
+      "dark-field": {
+        "role": "neutral",
+        "displayName": "Dark Field",
+        "canonical": "#1d1f23",
+        "tonalRamp": [
+          "oklch(15% 0.0082 264.41)",
+          "oklch(26.4% 0.0082 264.41)",
+          "oklch(37.9% 0.0082 264.41)",
+          "oklch(49.3% 0.0082 264.41)",
+          "oklch(60.7% 0.0082 264.41)",
+          "oklch(72.1% 0.0082 264.41)",
+          "oklch(83.6% 0.0082 264.41)",
+          "oklch(95% 0.0082 264.41)"
+        ]
+      },
+      "dark-border": {
+        "role": "neutral",
+        "displayName": "Dark Border",
+        "canonical": "#444952",
+        "tonalRamp": [
+          "oklch(15% 0.0165 262.30)",
+          "oklch(26.4% 0.0165 262.30)",
+          "oklch(37.9% 0.0165 262.30)",
+          "oklch(49.3% 0.0165 262.30)",
+          "oklch(60.7% 0.0165 262.30)",
+          "oklch(72.1% 0.0165 262.30)",
+          "oklch(83.6% 0.0165 262.30)",
+          "oklch(95% 0.0165 262.30)"
+        ]
+      },
+      "dark-control": {
+        "role": "neutral",
+        "displayName": "Dark Control",
+        "canonical": "#797f8a",
+        "tonalRamp": [
+          "oklch(15% 0.0182 262.71)",
+          "oklch(26.4% 0.0182 262.71)",
+          "oklch(37.9% 0.0182 262.71)",
+          "oklch(49.3% 0.0182 262.71)",
+          "oklch(60.7% 0.0182 262.71)",
+          "oklch(72.1% 0.0182 262.71)",
+          "oklch(83.6% 0.0182 262.71)",
+          "oklch(95% 0.0182 262.71)"
+        ]
+      },
+      "orange": {
+        "role": "primary",
+        "displayName": "Orange",
+        "canonical": "#ff9b55",
+        "tonalRamp": [
+          "oklch(15% 0.1467 53.69)",
+          "oklch(26.4% 0.1467 53.69)",
+          "oklch(37.9% 0.1467 53.69)",
+          "oklch(49.3% 0.1467 53.69)",
+          "oklch(60.7% 0.1467 53.69)",
+          "oklch(72.1% 0.1467 53.69)",
+          "oklch(83.6% 0.1467 53.69)",
+          "oklch(95% 0.1467 53.69)"
+        ]
+      },
+      "warm-light": {
+        "role": "neutral",
+        "displayName": "Warm Light",
+        "canonical": "#faf9f7",
+        "tonalRamp": [
+          "oklch(15% 0.0029 84.56)",
+          "oklch(26.4% 0.0029 84.56)",
+          "oklch(37.9% 0.0029 84.56)",
+          "oklch(49.3% 0.0029 84.56)",
+          "oklch(60.7% 0.0029 84.56)",
+          "oklch(72.1% 0.0029 84.56)",
+          "oklch(83.6% 0.0029 84.56)",
+          "oklch(95% 0.0029 84.56)"
+        ]
+      },
+      "light-text": {
+        "role": "neutral",
+        "displayName": "Light Text",
+        "canonical": "#22252b",
+        "tonalRamp": [
+          "oklch(15% 0.0120 264.34)",
+          "oklch(26.4% 0.0120 264.34)",
+          "oklch(37.9% 0.0120 264.34)",
+          "oklch(49.3% 0.0120 264.34)",
+          "oklch(60.7% 0.0120 264.34)",
+          "oklch(72.1% 0.0120 264.34)",
+          "oklch(83.6% 0.0120 264.34)",
+          "oklch(95% 0.0120 264.34)"
+        ]
+      },
+      "light-muted": {
+        "role": "neutral",
+        "displayName": "Light Muted",
+        "canonical": "#5c616a",
+        "tonalRamp": [
+          "oklch(15% 0.0157 262.33)",
+          "oklch(26.4% 0.0157 262.33)",
+          "oklch(37.9% 0.0157 262.33)",
+          "oklch(49.3% 0.0157 262.33)",
+          "oklch(60.7% 0.0157 262.33)",
+          "oklch(72.1% 0.0157 262.33)",
+          "oklch(83.6% 0.0157 262.33)",
+          "oklch(95% 0.0157 262.33)"
+        ]
+      },
+      "light-surface": {
+        "role": "neutral",
+        "displayName": "Light Surface",
+        "canonical": "#efeeea",
+        "tonalRamp": [
+          "oklch(15% 0.0054 95.10)",
+          "oklch(26.4% 0.0054 95.10)",
+          "oklch(37.9% 0.0054 95.10)",
+          "oklch(49.3% 0.0054 95.10)",
+          "oklch(60.7% 0.0054 95.10)",
+          "oklch(72.1% 0.0054 95.10)",
+          "oklch(83.6% 0.0054 95.10)",
+          "oklch(95% 0.0054 95.10)"
+        ]
+      },
+      "light-field": {
+        "role": "neutral",
+        "displayName": "Light Field",
+        "canonical": "#fff",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.88)",
+          "oklch(26.4% 0.0000 89.88)",
+          "oklch(37.9% 0.0000 89.88)",
+          "oklch(49.3% 0.0000 89.88)",
+          "oklch(60.7% 0.0000 89.88)",
+          "oklch(72.1% 0.0000 89.88)",
+          "oklch(83.6% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
+        ]
+      },
+      "light-border": {
+        "role": "neutral",
+        "displayName": "Light Border",
+        "canonical": "#d3d1cc",
+        "tonalRamp": [
+          "oklch(15% 0.0072 88.65)",
+          "oklch(26.4% 0.0072 88.65)",
+          "oklch(37.9% 0.0072 88.65)",
+          "oklch(49.3% 0.0072 88.65)",
+          "oklch(60.7% 0.0072 88.65)",
+          "oklch(72.1% 0.0072 88.65)",
+          "oklch(83.6% 0.0072 88.65)",
+          "oklch(95% 0.0072 88.65)"
+        ]
+      },
+      "light-control": {
+        "role": "neutral",
+        "displayName": "Light Control",
+        "canonical": "#747983",
+        "tonalRamp": [
+          "oklch(15% 0.0165 264.44)",
+          "oklch(26.4% 0.0165 264.44)",
+          "oklch(37.9% 0.0165 264.44)",
+          "oklch(49.3% 0.0165 264.44)",
+          "oklch(60.7% 0.0165 264.44)",
+          "oklch(72.1% 0.0165 264.44)",
+          "oklch(83.6% 0.0165 264.44)",
+          "oklch(95% 0.0165 264.44)"
+        ]
+      },
+      "burnt-orange": {
+        "role": "primary",
+        "displayName": "Burnt Orange",
+        "canonical": "#a63d08",
+        "tonalRamp": [
+          "oklch(15% 0.1492 41.22)",
+          "oklch(26.4% 0.1492 41.22)",
+          "oklch(37.9% 0.1492 41.22)",
+          "oklch(49.3% 0.1492 41.22)",
+          "oklch(60.7% 0.1492 41.22)",
+          "oklch(72.1% 0.1492 41.22)",
+          "oklch(83.6% 0.1492 41.22)",
+          "oklch(95% 0.1492 41.22)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "milestone-title": {
+        "displayName": "Milestone title",
+        "purpose": "22px Space title; fixed SVG anchors to its first line."
+      }
+    },
+    "shadows": [],
+    "motion": [],
+    "breakpoints": [
+      {
+        "name": "hero-stack",
+        "value": "820px"
+      },
+      {
+        "name": "phone",
+        "value": "600px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary action",
+      "kind": "button",
+      "description": "Existing accent owner action.",
+      "html": "<button class=\"ds-button\">Save draft</button>",
+      "css": ".ds-button{font:600 15px/1.55 system-ui,sans-serif;background:var(--accent,#ff9b55);color:var(--bg,#17181b);padding:12px 20px;min-height:48px;border:0;border-radius:8px;cursor:pointer}.ds-button:hover{filter:brightness(1.1)}.ds-button:focus-visible{outline:3px solid var(--accent,#ff9b55);outline-offset:4px}:host-context([data-theme=light]) .ds-button{color:white}"
+    },
+    {
+      "name": "Secondary action",
+      "kind": "button",
+      "description": "Existing quiet secondary owner action.",
+      "html": "<button class=\"ds-secondary\">Preview without saving</button>",
+      "css": ".ds-secondary{font:600 15px/1.55 system-ui,sans-serif;background:var(--surface,#23252a);color:var(--fg,#f2f3f5);padding:12px 20px;min-height:48px;border:1px solid var(--control,#797f8a);border-radius:8px;cursor:pointer}.ds-secondary:hover{filter:brightness(1.1)}.ds-secondary:focus-visible{outline:3px solid var(--accent,#ff9b55);outline-offset:4px}"
+    },
+    {
+      "name": "Known date input",
+      "kind": "input",
+      "description": "Optional precision; blank is valid and no precision is invented.",
+      "html": "<label class=\"ds-label\">Known date<input class=\"ds-input\" aria-describedby=\"ds-date-help\" placeholder=\"2026, 2026-10 or 2026-10-16\"></label><p id=\"ds-date-help\" class=\"ds-help\">Use YYYY, YYYY-MM or YYYY-MM-DD. Leave blank if unknown.</p>",
+      "css": ".ds-label{display:block;color:var(--fg,#f2f3f5);font:16px/1.55 system-ui,sans-serif;margin:12px 0}.ds-input{display:block;box-sizing:border-box;width:100%;padding:12px;margin:6px 0 24px;background:var(--field,#1d1f23);color:var(--fg,#f2f3f5);font:inherit;border:1px solid var(--control,#797f8a);border-radius:6px}.ds-input::placeholder{color:var(--muted,#afb3bb);opacity:1}.ds-input:focus-visible{outline:3px solid var(--accent,#ff9b55);outline-offset:4px}.ds-help{font:.88rem/1.55 system-ui,sans-serif;color:var(--muted,#afb3bb)}"
+    },
+    {
+      "name": "Milestone row",
+      "kind": "custom",
+      "description": "Title-anchored fixed SVG with optional month precision and description. Fictional specimen.",
+      "html": "<ol class=\"ds-milestones\"><li><span class=\"ds-symbol\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m8 6-6 6 6 6m8-12 6 6-6 6m-3-15-2 18\"/></svg></span><div><h3><a href=\"#fictional-milestone\">Fictional independent release<svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M7 17 17 7M7 7h10v10\"/></svg></a></h3><time datetime=\"2026-10\">October 2026</time><p>A fictional local-only credit.</p></div></li></ol>",
+      "css": ".ds-milestones{list-style:none;padding:0;max-width:820px;margin:24px 0;color:var(--fg,#f2f3f5)}.ds-milestones>li{display:grid;grid-template-columns:24px minmax(0,1fr);gap:16px;padding:24px 0;border-top:1px solid var(--border,#444952)}.ds-symbol{display:inline-flex;align-items:center;justify-content:center;align-self:start;margin-top:3px;color:var(--accent,#ff9b55)}.ds-milestones h3{font:600 22px/1.3 Space,system-ui;letter-spacing:-.025em;margin:0;overflow-wrap:anywhere}.ds-milestones h3 a{display:inline;color:inherit;text-underline-offset:4px;overflow-wrap:anywhere}.ds-milestones h3 a:focus-visible{outline:3px solid var(--accent,#ff9b55);outline-offset:4px}.ds-milestones h3 svg{margin-left:8px;vertical-align:middle}.ds-milestones time{display:block;color:var(--muted,#afb3bb);font:14px/1.55 system-ui,sans-serif;margin-top:8px}.ds-milestones p{max-width:68ch;margin:12px 0 0;font:16px/1.55 system-ui,sans-serif;white-space:pre-wrap;overflow-wrap:anywhere}"
+    },
+    {
+      "name": "Retained edit comparison",
+      "kind": "custom",
+      "description": "Saved fields wrap beside explicit recovery controls; no automatic resubmission.",
+      "html": "<section class=\"ds-compare\"><p>Compare before saving again. Your edits are kept here.</p><dl><dt>Saved title</dt><dd>Fictional milestone</dd><dt>Saved status</dt><dd>draft</dd></dl><div class=\"ds-actions\"><button class=\"ds-secondary\">Use saved version</button><button class=\"ds-secondary\">Keep my edits</button></div></section>",
+      "css": ".ds-compare{font:16px/1.55 system-ui,sans-serif;color:var(--fg,#f2f3f5);padding-block:16px;overflow-wrap:anywhere}.ds-compare dt{font-weight:600}.ds-compare dd{margin:0 0 16px;white-space:pre-wrap}.ds-actions{display:flex;gap:12px;flex-wrap:wrap}.ds-secondary{font:600 15px/1.55 system-ui,sans-serif;padding:12px 20px;min-height:48px;border:1px solid var(--control,#797f8a);border-radius:8px;background:var(--surface,#23252a);color:var(--fg,#f2f3f5);cursor:pointer}.ds-secondary:hover{filter:brightness(1.1)}.ds-secondary:focus-visible{outline:3px solid var(--accent,#ff9b55);outline-offset:4px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "",
+    "overview": "Preserve the incumbent editorial collection: illustrated hero, readable profile identity and published picks. Linkarooie is the public app identity; owner-authored titles and the original magpie/shelf artwork remain. Repository, app and route IDs stay `showcase`. Source: `src/common.ts`, `src/profile.ts`, `src/worker.ts` and `docs/linkarooie-provenance.md`.",
+    "keyCharacteristics": [],
+    "rules": [],
+    "dos": [],
+    "donts": []
+  }
+}
