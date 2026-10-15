@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {DatabaseSync} from 'node:sqlite';
 import {readFileSync} from 'node:fs';
 import {profileSettingsFile,exportProfileSettings,changeProfileSettings,profileFileFormat} from '../src/profile-portability.ts';
-import {sessionCookie} from '../src/common.ts';
+import {sessionCookie,client} from '../src/common.ts';
+import {runInNewContext} from 'node:vm';
 import worker from '../src/worker.ts';
 const config={title:'Fictional field notes',intro:'A fictional profile.',theme:'midnight',layout:'compact',handle:'field.notes',website:'https://example.test/',github:'https://github.com/example',bluesky:'',linkedin:''};
 const file=(patch={})=>({format:profileFileFormat,version:1,config:{...config,...patch}});
@@ -109,4 +110,20 @@ test('file review controls appear only inside the authenticated studio, with ine
    assert.match(html,/href="\/showcase\/api\/profile-settings" download="linkarooie-profile.json"/);assert.match(html,/<section data-settings-comparison hidden/);assert.match(html,/data-apply-settings disabled/);assert.match(html,/aria-describedby="profile-settings-file-help"/);assert.match(html,/Reviewing saves nothing/);assert.doesNotMatch(html,/FICTIONAL PRIVATE EXTENSION/);
   }
  }finally{f.sqlite.close();}
+});
+test('ordinary settings save releases pending state after cancelled navigation and reports only confirmed saved values',async()=>{
+ for(const fails of [false,true]){
+  const button={disabled:false},message={textContent:''},dataset={},events=[];let submit,reloads=0,respond;
+  const submitted={...config,title:'  Normalized name  '},saved={...config,title:'Normalized name',ownerExtension:'FICTIONAL PRIVATE EXTENSION'};
+  const form={dataset,querySelector:selector=>selector==='button'?button:message,addEventListener(name,handler){if(name==='submit')submit=handler;},dispatchEvent(event){events.push(event);}};
+  const document={querySelector:selector=>selector==='#config'?form:selector==='main [role=status]'?message:null};
+  const source=client('','showcase_session').replace(/^<script>/,'').replace(/<\/script>$/,'');
+  runInNewContext(source,{document,FormData:class{constructor(){return Object.entries(submitted);}},CustomEvent:class{constructor(type,options){this.type=type;this.detail=options.detail;}},location:{reload(){reloads++;/* Model a cancelled navigation, not actual browser acceptance. */}},fetch:()=>new Promise(done=>{respond=done;})});
+  const pending=submit({preventDefault(){},currentTarget:form});assert.equal(dataset.saving,'true');assert.equal(button.disabled,true);
+  respond({ok:!fails,json:async()=>fails?{error:'Fictional uncertain result'}:{ok:true,config:saved}});await pending;
+  assert.equal(dataset.saving,undefined);assert.equal(button.disabled,false);
+  assert.equal(reloads,fails?0:1);assert.equal(events.length,fails?0:1);
+  if(!fails){assert.equal(events[0].type,'linkarooie:settings-saved');assert.equal(events[0].detail.submitted.title,submitted.title);assert.equal(events[0].detail.saved.title,saved.title);assert.equal(message.textContent,'Configuration saved.');}
+  else assert.equal(message.textContent,'Fictional uncertain result');
+ }
 });

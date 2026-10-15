@@ -7,6 +7,13 @@ export function setupProfileSettings({base,lock,isBusy,registerDraft}){
  const form=studio.querySelector('form'),input=form.elements.namedItem('file'),comparison=studio.querySelector('[data-settings-comparison]'),diff=studio.querySelector('[data-settings-diff]'),apply=studio.querySelector('[data-apply-settings]'),cancel=studio.querySelector('[data-cancel-settings]'),status=studio.querySelector('[data-portability-status]');
  const formValues=()=>Object.fromEntries(keys.map(key=>[key,configForm.elements.namedItem(key)?.value??'']));
  let formBaseline=JSON.stringify(formValues()),file=null,review=null,needsReview=true;
+ configForm.addEventListener('linkarooie:settings-saved',event=>{
+  const {submitted,saved}=event.detail??{};if(!submitted||!saved)return;const known=Object.fromEntries(keys.map(key=>[key,saved[key]]));if(!supported(known))return;
+  // Preserve any edit made while the ordinary request was pending. Advance
+  // only confirmed saved values, including the server's normalization.
+  for(const key of keys){const control=configForm.elements.namedItem(key);if(control.value===submitted[key])control.value=known[key];}
+  formBaseline=JSON.stringify(known);
+ });
  registerDraft(()=>input.files.length>0&&(needsReview||!!review?.changedFields.length));
  const show=message=>{status.textContent=message;};
  const state=()=>{apply.disabled=isBusy()||needsReview||!review||review.changedFields.length===0;};
