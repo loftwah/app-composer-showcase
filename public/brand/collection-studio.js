@@ -4,9 +4,18 @@ if (cards) {
   const base = cards.dataset.base;
   const output = document.querySelector('main > .message');
   let busy=false;
+  const draftChecks=[];
+  const fields=(form,keys)=>Object.fromEntries(keys.map(key=>{const control=form.elements.namedItem(key);return [key,control.type==='checkbox'?control.checked:control.value];}));
+  const watch=(form,keys)=>{
+    let saved=fields(form,keys);
+    draftChecks.push(()=>JSON.stringify(fields(form,keys))!==JSON.stringify(saved));
+    return values=>{saved=Object.fromEntries(keys.map(key=>{const control=form.elements.namedItem(key).cloneNode(true);if(control.type==='checkbox')control.checked=values[key];else control.value=values[key];return [key,control.type==='checkbox'?control.checked:control.value];}));};
+  };
+  window.addEventListener('beforeunload',event=>{if(busy||draftChecks.some(changed=>changed())){event.preventDefault();event.returnValue='';}});
+  const reloadSaved=()=>{busy=false;location.reload();};
   const lock=()=>{
     if(busy)return null;busy=true;
-    const controls=new Map([...cards.querySelectorAll('button,input,textarea,select')].map(control=>[control,control.disabled]));
+    const controls=new Map([...document.querySelectorAll('#cards,#manual,#feature')].flatMap(container=>[...container.querySelectorAll('button,input,textarea,select')]).map(control=>[control,control.disabled]));
     controls.forEach((_,control)=>{control.disabled=true;});
     return ()=>{busy=false;controls.forEach((disabled,control)=>{control.disabled=disabled||control.dataset.conflicted==='true';});};
   };
@@ -22,14 +31,16 @@ if (cards) {
   }
   const message = error => { output.textContent = error.message || String(error); };
   for (const [id, status] of [['manual', 'draft'], ['feature', 'published']]) {
-    document.querySelector('#' + id).addEventListener('submit', async event => {
+    const entry=document.querySelector('#'+id);
+    watch(entry,id==='manual'?['title','description','url']:['item']);
+    entry.addEventListener('submit', async event => {
       event.preventDefault();
-      const form = event.currentTarget, button = form.querySelector('button'),data=Object.fromEntries(new FormData(form)),unlock=lock();
-      if(!unlock)return;button.disabled = true;
+      const form = event.currentTarget,data=Object.fromEntries(new FormData(form)),unlock=lock();
+      if(!unlock)return;
       try {
         await request('/api/cards', { ...data, status });
-        location.reload();
-      } catch (error) { message(error); }finally{unlock();button.disabled=false;}
+        form.reset();output.textContent=status==='draft'?'Draft link saved. Refresh when your other edits are ready.':'Photo featured. Refresh when your other edits are ready.';reloadSaved();
+      } catch (error) { message(error); }finally{unlock();}
     });
   }
   for (const form of cards.querySelectorAll('[data-edit-card]')) {
@@ -37,6 +48,7 @@ if (cards) {
     const preview = form.querySelector('[data-card-preview]');
     const saveButton = form.querySelector('[type=submit]');
     let expected = JSON.parse(form.dataset.linkSnapshot), conflicted = false;
+    const markSaved=watch(form,['title','description','url','status']);
     const compare = document.createElement('div');
     compare.className = 'card-edit-conflict'; compare.hidden = true;
     form.insertBefore(compare, status);
@@ -54,7 +66,7 @@ if (cards) {
         const heading=document.createElement('p');heading.textContent='The saved link changed. Compare before choosing which version to save.';
         const list=document.createElement('dl');
         for(const [key,label] of [['title','Saved title'],['description','Saved description'],['url','Saved destination'],['status','Saved visibility']]){const term=document.createElement('dt'),detail=document.createElement('dd');term.textContent=label;detail.textContent=current[key]||'No description';list.append(term,detail);}
-        const choose=keep=>{expected=current;conflicted=false;saveButton.dataset.conflicted='false';saveButton.disabled=false;compare.hidden=true;if(!keep)for(const [key,value]of Object.entries(current))form.elements.namedItem(key).value=value;preview.hidden=true;status.textContent=keep?'Your edits are kept. Check the visibility before saving.':'Using the saved link.';form.elements.namedItem(keep?'status':'title').focus();};
+        const choose=keep=>{expected=current;markSaved(current);conflicted=false;saveButton.dataset.conflicted='false';saveButton.disabled=false;compare.hidden=true;if(!keep)for(const [key,value]of Object.entries(current))form.elements.namedItem(key).value=value;preview.hidden=true;status.textContent=keep?'Your edits are kept. Check the visibility before saving.':'Using the saved link.';form.elements.namedItem(keep?'status':'title').focus();};
         const actions=document.createElement('div');actions.className='row';actions.append(button('Use saved link',()=>choose(false)),button('Keep my edits',()=>choose(true)));compare.replaceChildren(heading,list,actions);actions.querySelector('button').focus();
       } catch(error) {status.textContent=error.message;retry.disabled=false;}
     }
@@ -86,7 +98,7 @@ if (cards) {
         expected={title:values.title.trim(),description:values.description.trim(),url:new URL(values.url).href,status:values.status};
         for(const [key,value]of Object.entries(expected))form.elements.namedItem(key).value=value;
         const row=form.closest('[data-card]');row.querySelector('h3').textContent=expected.title;row.querySelector(':scope > p').textContent=expected.status+' · Your authored card';
-        preview.hidden=true;status.textContent='Link saved.';
+        markSaved(expected);preview.hidden=true;status.textContent='Link saved.';
       } catch (error) { status.textContent = error.message; if(error.status===409||error.status===404){conflicted=true;button.dataset.conflicted='true';await compareSaved();} }finally{unlock();}
     });
   }
@@ -108,7 +120,9 @@ if (cards) {
         output.textContent = 'Collection order saved.';
       } else {
         await request('/api/cards', { id: row.dataset.card, status: button.dataset.status, delete: !!button.dataset.delete });
-        location.reload();
+        output.textContent=button.dataset.delete?'Card removed. Refresh when your other edits are ready.':'Card '+button.dataset.status+'. Refresh when your other edits are ready.';
+        if(!button.dataset.delete)row.querySelector(':scope > p').textContent=button.dataset.status+' · '+(row.querySelector('[data-edit-card]')?'Your authored card':'Linked source contribution · content follows its source');
+        reloadSaved();
       }
     } catch (error) { message(error); }
     finally {
@@ -118,13 +132,14 @@ if (cards) {
   });
 // Link presentation is saved independently from card content and visibility.
 for(const form of document.querySelectorAll('[data-presentation-card]')){
+ const markSaved=watch(form,['icon','pinned']);
  form.addEventListener('submit',async event=>{
   event.preventDefault();const output=form.querySelector('[role=status]');
   const data=new FormData(form),unlock=lock();if(!unlock)return;
   try{
    const response=await fetch(base+'/api/presentation',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:form.closest('[data-card]').dataset.card,pinned:data.has('pinned'),icon:data.get('icon')})});
    const result=await response.json();if(!response.ok)throw Error(result.error||'Could not save the link style.');
-   output.textContent='Link style saved. Content and visibility are unchanged.';
+   markSaved(fields(form,['icon','pinned']));output.textContent='Link style saved. Content and visibility are unchanged.';
   }catch(error){output.textContent=error.message||'Could not save the link style. Your selections are kept here.';}
   finally{unlock();}
  });
