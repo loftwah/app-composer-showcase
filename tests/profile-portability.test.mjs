@@ -88,6 +88,7 @@ test('owner API protects download/review/apply, enforces cookie origins and body
   const call=(method='GET',body,headers={Authorization:'Bearer fictional-owner'})=>worker.fetch(new Request(origin+'/api/profile-settings',{method,headers:{'Content-Type':'application/json',...headers},...(body===undefined?{}:{body:typeof body==='string'?body:JSON.stringify(body)})}),env,{waitUntil(){}});
   for(const headers of [{},{Authorization:'Bearer hunter2'}]){assert.equal((await call('GET',undefined,headers)).status,401);assert.equal((await call('POST',{action:'review',file:file()},{Origin:origin,...headers})).status,401);}
   const download=await call();assert.equal(download.status,200);assert.match(download.headers.get('Content-Disposition'),/attachment; filename="linkarooie-profile.json"/);assert.equal(download.headers.get('Cache-Control'),'no-store');assert.deepEqual(await download.json(),file());
+  const mounted=await worker.fetch(new Request(origin+'/showcase/api/profile-settings',{headers:{Authorization:'Bearer fictional-owner'}}),env,{waitUntil(){}});assert.equal(mounted.status,200);assert.deepEqual(await mounted.json(),file());
   assert.equal((await call('DELETE')).status,405);
   const Cookie=(await sessionCookie(env,'showcase_session','')).split(';')[0];
   assert.equal((await call('POST',{action:'review',file:file()},{Cookie,Origin:'https://other.example.test'})).status,403);
