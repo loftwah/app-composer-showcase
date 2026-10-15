@@ -1,4 +1,5 @@
 import {iconNames, type LinkIcon} from './profile.ts';
+import {replaceCollectionSetting} from './settings-collection.ts';
 import {validAchievementDate} from '../public/brand/achievement-date.mjs';
 export {validAchievementDate,achievementDateLabel} from '../public/brand/achievement-date.mjs';
 
@@ -71,7 +72,7 @@ export async function changeAchievements(db:D1Database,input:unknown){
  const next:AchievementCollection={version:1,revision:collection.revision+1,items},bytes=JSON.stringify(next);
  if(new TextEncoder().encode(bytes).byteLength>32768)throw new AchievementError('The achievement list exceeds its supported size.');
  let saved:{value:string}|null;
- try{saved=await db.prepare("INSERT INTO settings(id,value) SELECT 'profile-achievements-v1',? WHERE (? IS NULL AND NOT EXISTS(SELECT 1 FROM settings WHERE id='profile-achievements-v1')) OR EXISTS(SELECT 1 FROM settings WHERE id='profile-achievements-v1' AND value=?) ON CONFLICT(id) DO UPDATE SET value=excluded.value WHERE settings.value=? RETURNING value").bind(bytes,raw,raw,raw).first<{value:string}>();}catch{throw new AchievementError('The save could not be confirmed. Refresh achievements before retrying.',503);}
+ try{saved=await replaceCollectionSetting(db,key,raw,bytes);}catch{throw new AchievementError('The save could not be confirmed. Refresh achievements before retrying.',503);}
  if(!saved)throw new AchievementError('Achievements changed. Refresh and compare before saving again.',409);
  return {collection:next,id};
 }
