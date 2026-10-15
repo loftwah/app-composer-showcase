@@ -2,7 +2,7 @@
   "contract": 1,
   "id": "showcase",
   "name": "Linkarooie",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "repository": "https://github.com/loftwah/app-composer-showcase",
   "runtime": "cloudflare-worker",
   "entry": "src/worker.ts",
@@ -92,6 +92,15 @@
       "music",
       "video",
       "heart"
+    ]
+  },
+  "achievementCollection": {
+    "version": 1,
+    "limit": 8,
+    "datePrecisions": [
+      "year",
+      "month",
+      "day"
     ]
   }
 }

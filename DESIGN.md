@@ -10,6 +10,7 @@ colors: {
 typography:
   headline: {fontFamily: "Space, system-ui", lineHeight: 1.1, letterSpacing: "-.025em"}
   body: {fontFamily: "system-ui, sans-serif", fontSize: "16px", lineHeight: 1.55}
+  milestone-title: {fontFamily: "Space, system-ui", fontSize: "22px", fontWeight: 600, lineHeight: 1.3}
 rounded: {field: "6px", card: "8px", dialog: "12px"}
 ---
 # Design System: Linkarooie
@@ -44,6 +45,16 @@ Use softly rounded controls and media, thin borders and fixed functional SVG geo
 - Sharing uses the published canonical URL: native share where available, clipboard copy, then a focused selectable URL for manual recovery. Cancellation is not a success message.
 - Owner profile fields stay in native optional controls inside “Profile & social links”. Keep muted placeholders and inline saving/error status; a failed save retains entries and enables retry.
 - Compact rows carry title, optional description and destination; pinned cards precede other cards while keeping order within each group. Gallery/editorial layouts remain available.
+
+### Milestones & credits
+
+Reviewed 16 October 2026. The public extension is an open ruled list capped at (820px), with a fixed (24px) symbol column, (16px) gap and (24px) row padding. Titles use Space (600, 22px/1.3); optional linked titles retain an outbound arrow. Existing fixed SVG symbols use the theme accent and anchor to the first title line, independent of description length. Keep this alignment scoped to milestones so compact collection rows retain their incumbent treatment.
+
+Known dates are optional and preserve year, month or real calendar-day precision; written dates are muted (14px). Omit unknown dates and absent descriptions, and omit the public section entirely when no achievements are published. Descriptions retain line breaks and wrap long text. No replacement artwork, card grid or new palette is introduced.
+
+The standalone owner studio uses one inline editor beneath the ruled saved list. Native labelled controls, inherited theme tokens, wrapping action rows and a text-only unsaved preview extend the existing studio. New items save as private drafts; publication remains explicit, with immediate-publication wording when editing a published item. Save/discard protects the current edit when switching items. Conflicts compare saved fields alongside retained edits with Use saved version/Keep my edits; unavailable comparisons, ambiguous saves and removed records retain copyable text and block unsafe resubmission. Remove uses the browser's native confirmation.
+
+Local finish evidence: the original FIX and separate SHIP verdict remain in `.private/achievement-finish-review.md` and `.private/achievement-finish-verdict.md`. The retained private confirmation manifest records Showcase `119732524f2027a3606cd7c5cb4d6bca7ec77aed` and native `623e7e4e310fcaca1521e542298f6321371a5e3e`, with 16 confirmation frames at (390px)/(1440px) in both themes. The two scored fixes—title-associated public symbols and actionable native invalid-field recovery—are resolved. The original 25-stage qualification is retained in `.private/achievement-local-qualification.json`; all data is fictional/local and native role 50 authentication is simulated. This does not establish production, source-pin activation, human authentication or the complete homepage/artwork appearance.
 
 ## Do's and Don'ts
 
