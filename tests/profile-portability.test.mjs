@@ -21,6 +21,7 @@ function fixture(saved={...config,ownerExtension:{private:'FICTIONAL PRIVATE EXT
 const status=expected=>error=>error.status===expected;
 test('portable format accepts only declared settings and safe destinations; never executable or credential fields',()=>{
  assert.deepEqual(profileSettingsFile(file()),file());
+ const manifest=JSON.parse(readFileSync(new URL('../app.manifest.json',import.meta.url),'utf8'));assert.deepEqual(manifest.profileSettings,{version:1,format:profileFileFormat,maxFileBytes:32768});
  for(const value of ["export default { token: 'no' }",null,[],{...file(),version:2},{...file(),OWNER_API_TOKEN:'no'},{...file(),source:'https://example.test/build'},{...file(),config:{...config,token:'no'}},{...file(),config:{...config,website:'javascript:alert(1)'}},{...file(),config:{...config,website:'https://fictional:secret@example.test/'}},{...file(),config:{...config,github:'https://example.test/spoof'}},{...file(),config:{...config,title:''}},{...file(),config:{...config,layout:'arbitrary-html'}}])assert.throws(()=>profileSettingsFile(value),status(400));
  const missing=file();delete missing.config.handle;assert.throws(()=>profileSettingsFile(missing),status(400));
  assert.equal(profileSettingsFile(file({website:'https://example.test'})).config.website,'https://example.test/');
