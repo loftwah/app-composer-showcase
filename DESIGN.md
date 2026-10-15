@@ -1,5 +1,5 @@
 ---
-name: Top shelf
+name: Linkarooie
 description: Existing collection and profile presentation
 colors: {
   charcoal: "#17181b", dark-text: "#f2f3f5", dark-muted: "#afb3bb", dark-surface: "#23252a",
@@ -12,11 +12,11 @@ typography:
   body: {fontFamily: "system-ui, sans-serif", fontSize: "16px", lineHeight: 1.55}
 rounded: {field: "6px", card: "8px", dialog: "12px"}
 ---
-# Design System: Top shelf
+# Design System: Linkarooie
 
 ## Overview
 
-Preserve the incumbent editorial collection: illustrated hero, readable profile identity and published picks. Public Top shelf naming and original magpie/shelf artwork remain; Linkarooie references do not authorise a rebrand. Source: `src/common.ts`, `src/profile.ts`, `src/worker.ts` and `docs/linkarooie-provenance.md`.
+Preserve the incumbent editorial collection: illustrated hero, readable profile identity and published picks. Linkarooie is the public app identity; owner-authored titles and the original magpie/shelf artwork remain. Repository, app and route IDs stay `showcase`. Source: `src/common.ts`, `src/profile.ts`, `src/worker.ts` and `docs/linkarooie-provenance.md`.
 
 ## Colors
 
@@ -47,7 +47,7 @@ Use softly rounded controls and media, thin borders and fixed functional SVG geo
 
 ## Do's and Don'ts
 
-Do extend these tokens, existing artwork, native interactions and both themes. Don't add an avatar/banner system, decorative icon imports, tracking claims or Linkarooie naming ahead of the coordinated identity release.
+Do extend these tokens, existing artwork, native interactions and both themes. Keep Linkarooie naming coordinated with Composer's catalogue, Init, admin, launcher and composed navigation. Don't rename owner titles or introduce media systems or tracking through a branding change.
 
 Owner conflict recovery, reviewed 16 October 2026: the existing link editor retains unsaved fields after a refused save, then shows the current saved fields in a wrapping native definition list and two explicit recovery buttons. Use saved link focuses the title; Keep my edits focuses visibility for review. A failed private comparison keeps text and offers a read-only retry. Removed/replaced records remain copyable with saving blocked. This preserves the incumbent controls, theme surfaces and phone layout; it adds no remote preview or persistent private drafts.
 
