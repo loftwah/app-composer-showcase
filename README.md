@@ -29,3 +29,11 @@ Add `?vitals=1` to the public page, then open “Page performance” for local L
 Original editorial presentation, reviewed 14 October 2026: app-specific illustrated hero and sharing artwork, responsive 600/1200px WebP sources, reserved image dimensions, clear collection/story sections and native browse/contribute actions. Illustration is labelled separately from published contributions. Mounted social URLs resolve inside the app mount. Owner titles, introductions, layouts, moderation, data and configuration contracts are preserved. Asset provenance and optimisation are recorded beside each derivative.
 
 The protected collection studio edits existing authored titles, descriptions and HTTPS destinations, previews unsaved cards without network fetching, and saves with explicit visibility. Source-backed photo content stays owned by its provider. Reordering waits for a successful server response before changing the visible order; failures leave the current order intact.
+
+## Profile and link presentation
+
+Reviewed 15 October 2026. The title and introduction become the profile name and bio. The owner studio adds an optional handle and Website/GitHub/Bluesky/LinkedIn addresses. Empty optional links disappear. Addresses require HTTPS without embedded credentials; named social services require their own reviewed hostnames. Older configuration clients preserve these additional fields.
+
+Choose compact layout for a text-first collection, or retain the existing gallery/editorial layouts. Each current card has an independent fixed icon and pin control. Pinned public cards come first while original position/id order remains stable inside each group. Private and revoked cards remain excluded. Saving a link style changes neither its content nor publication state. The existing private export includes those fields. All records stay in this app's D1; no schema migration is needed.
+
+Sharing uses the published server canonical URL with native share where available, then clipboard/manual-copy recovery. Cancelled native sharing records no success or conversion. No external destination is fetched for previews, and no visitor/action tracker was added. Exact source references, reuse and deferred features are in [the provenance matrix](docs/linkarooie-provenance.md).

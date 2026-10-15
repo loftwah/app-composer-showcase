@@ -2,7 +2,7 @@
   "contract": 1,
   "id": "showcase",
   "name": "Top shelf",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "repository": "https://github.com/loftwah/app-composer-showcase",
   "runtime": "cloudflare-worker",
   "entry": "src/worker.ts",
@@ -37,9 +37,61 @@
       "type": "select",
       "options": [
         "grid",
-        "editorial"
+        "editorial",
+        "compact"
       ],
       "default": "grid"
+    },
+    "handle": {
+      "type": "string",
+      "default": "",
+      "maxLength": 40,
+      "format": "handle"
+    },
+    "website": {
+      "type": "string",
+      "default": "",
+      "maxLength": 2048,
+      "format": "https-url"
+    },
+    "github": {
+      "type": "string",
+      "default": "",
+      "maxLength": 2048,
+      "format": "https-url",
+      "hosts": [
+        "github.com"
+      ]
+    },
+    "bluesky": {
+      "type": "string",
+      "default": "",
+      "maxLength": 2048,
+      "format": "https-url",
+      "hosts": [
+        "bsky.app"
+      ]
+    },
+    "linkedin": {
+      "type": "string",
+      "default": "",
+      "maxLength": 2048,
+      "format": "https-url",
+      "hosts": [
+        "linkedin.com",
+        "www.linkedin.com"
+      ]
     }
+  },
+  "cardPresentation": {
+    "version": 1,
+    "icons": [
+      "link",
+      "book",
+      "code",
+      "music",
+      "video",
+      "heart"
+    ]
   }
 }
