@@ -118,7 +118,7 @@ test('ordinary settings save releases pending state after cancelled navigation a
   const form={dataset,querySelector:selector=>selector==='button'?button:message,addEventListener(name,handler){if(name==='submit')submit=handler;},dispatchEvent(event){events.push(event);}};
   const document={querySelector:selector=>selector==='#config'?form:selector==='main [role=status]'?message:null};
   const source=client('','showcase_session').replace(/^<script>/,'').replace(/<\/script>$/,'');
-  runInNewContext(source,{document,FormData:class{constructor(){return Object.entries(submitted);}},CustomEvent:class{constructor(type,options){this.type=type;this.detail=options.detail;}},location:{reload(){reloads++;/* Model a cancelled navigation, not actual browser acceptance. */}},fetch:()=>new Promise(done=>{respond=done;})});
+  runInNewContext(source,{document,FormData:class{constructor(){return Object.entries(submitted);}},CustomEvent:class{constructor(type,options){this.type=type;this.detail=options.detail;}},location:{reload(){assert.equal(dataset.saving,undefined);assert.equal(button.disabled,false);reloads++;/* Model a cancelled navigation, not actual browser acceptance. */}},fetch:()=>new Promise(done=>{respond=done;})});
   const pending=submit({preventDefault(){},currentTarget:form});assert.equal(dataset.saving,'true');assert.equal(button.disabled,true);
   respond({ok:!fails,json:async()=>fails?{error:'Fictional uncertain result'}:{ok:true,config:saved}});await pending;
   assert.equal(dataset.saving,undefined);assert.equal(button.disabled,false);

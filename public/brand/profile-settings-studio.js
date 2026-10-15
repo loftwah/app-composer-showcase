@@ -14,6 +14,7 @@ export function setupProfileSettings({base,lock,isBusy,registerDraft}){
   for(const key of keys){const control=configForm.elements.namedItem(key);if(control.value===submitted[key])control.value=known[key];}
   formBaseline=JSON.stringify(known);
  });
+ registerDraft(()=>configForm.dataset.saving==='true'||JSON.stringify(formValues())!==formBaseline);
  registerDraft(()=>input.files.length>0&&(needsReview||!!review?.changedFields.length));
  const show=message=>{status.textContent=message;};
  const state=()=>{apply.disabled=isBusy()||needsReview||!review||review.changedFields.length===0;};
