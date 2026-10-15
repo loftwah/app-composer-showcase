@@ -181,14 +181,14 @@ const app = {
           if (!c.provider && b.title !== undefined && !text(b.title, 100))
             return error("Give this card a title");
           await env.DB.prepare(
-            "UPDATE cards SET title=?,description=?,url=?,status=? WHERE id=?",
+            "UPDATE cards SET title=COALESCE(?,title),description=COALESCE(?,description),url=COALESCE(?,url),status=? WHERE id=?",
           )
             .bind(
-              b.title === undefined ? c.title : text(b.title, 100),
+              b.title === undefined ? null : text(b.title, 100),
               b.description === undefined
-                ? c.description
+                ? null
                 : text(b.description, 240),
-              b.url === undefined ? c.url : safeURL(b.url),
+              b.url === undefined ? null : safeURL(b.url),
               status,
               id,
             )
