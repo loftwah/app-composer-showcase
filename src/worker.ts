@@ -114,7 +114,7 @@ const app = {
           !req.headers.get("Authorization")
         )
           return error("Write origin is not authorised", 403);
-        const b = await readJSON(req);
+        const b = await readJSON(req,path==='/api/cards'?32768:8192);
         if(path==='/api/presentation'){
           if(typeof b.id!=='string'||!/^[a-zA-Z0-9-]{1,64}$/.test(b.id))return error('Choose a current card.');
           const value=decoration({pinned:b.pinned,icon:b.icon});
@@ -164,6 +164,17 @@ const app = {
               env.DB.prepare("UPDATE settings SET value=json_remove(value,?) WHERE id='presentation'").bind('$.'+JSON.stringify(id)),
             ]);
             return json({ ok: true });
+          }
+          if(b.expected!==undefined){
+            const expected=b.expected;
+            // A former 8 KiB raw URL can expand to at most 24 KiB in storage.
+            // Compare it without truncation so the owner can repair that record.
+            if(c.provider||!expected||typeof expected!=='object'||Array.isArray(expected)||Object.keys(expected).length!==4||!['title','description','url','status'].every(key=>Object.hasOwn(expected,key))||typeof expected.title!=='string'||expected.title.length>100||typeof expected.description!=='string'||expected.description.length>240||typeof expected.url!=='string'||expected.url.length>24576||!['draft','published','hidden'].includes(expected.status))return error('Use a current authored link snapshot.');
+            if(typeof b.title!=='string'||!text(b.title,100)||b.title.length>100||typeof b.description!=='string'||b.description.length>240||typeof b.url!=='string'||b.url.length>2048||!['draft','published','hidden'].includes(b.status))return error('Check the link text, destination and visibility.');
+            const url=safeURL(b.url);if(url.length>2048)return error('Use an HTTPS destination up to 2048 characters.');
+            const saved=await env.DB.prepare('UPDATE cards SET title=?,description=?,url=?,status=? WHERE id=? AND provider IS NULL AND title=? AND description=? AND url=? AND status=? RETURNING id').bind(text(b.title,100),text(b.description,240),url,b.status,id,expected.title,expected.description,expected.url,expected.status).first();
+            if(!saved)return error('This link changed or was removed. Refresh and compare before saving again.',409);
+            return json({ok:true});
           }
           if (status === "published" && c.provider && !(await resolve(env, c)))
             return error("Source is no longer eligible", 409);

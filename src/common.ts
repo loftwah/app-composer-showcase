@@ -131,7 +131,7 @@ export function text(v: unknown, max = 240) {
 }
 export function safeURL(v: unknown) {
   const u = new URL(String(v));
-  if (u.protocol !== "https:" || u.username || u.password)
+  if (u.protocol !== "https:" || u.username || u.password || u.href.length>2048)
     throw new Error("Use a public HTTPS destination");
   return u.href;
 }

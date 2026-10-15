@@ -72,3 +72,48 @@ test('the bounded configuration API accepts all four maximum-sized canonical soc
   assert(JSON.stringify(input).length>8192);const res=await f.request('/api/config',input);assert.equal(res.status,200);const body=await res.json();assert.equal(body.config.linkedin.length,2048);assert.equal((await f.request('/',null,false)).status,200);
  }finally{f.sqlite.close();}
 });
+
+test('guarded manual-link edits atomically preserve a concurrent visibility change',async()=>{
+ const f=fixture();try{
+  const expected={title:'Fictional original',description:'Original note',url:'https://example.test/original',status:'published'};
+  const card=await(await f.request('/api/cards',expected)).json();
+  const update={id:card.id,title:'Fictional edited',description:'Edited note',url:'https://example.test/edited',status:'published',expected};
+  await f.request('/api/cards',{id:card.id,status:'hidden'});
+  assert.equal((await f.request('/api/cards',update)).status,409);
+  assert.equal(f.sqlite.prepare('SELECT status FROM cards WHERE id=?').get(card.id).status,'hidden');
+  update.expected={...expected,status:'hidden'};update.status='draft';
+  assert.equal((await f.request('/api/cards',update)).status,200);
+  assert.equal(f.sqlite.prepare('SELECT status FROM cards WHERE id=?').get(card.id).status,'draft');
+  let started,release;const paused=new Promise(resolve=>started=resolve),gate=new Promise(resolve=>release=resolve),prepare=f.DB.prepare;
+  f.DB.prepare=sql=>{const statement=prepare(sql);if(sql.startsWith('UPDATE cards SET')&&sql.includes('RETURNING')){const bind=statement.bind;statement.bind=(...values)=>{const bound=bind(...values),first=bound.first;bound.first=async()=>{started();await gate;return first();};return bound;};}return statement;};
+  const pending=f.request('/api/cards',{...update,expected:{title:update.title,description:update.description,url:update.url,status:'draft'},status:'published'});
+  await paused;await f.request('/api/cards',{id:card.id,status:'hidden'});release();assert.equal((await pending).status,409);
+  assert.equal(f.sqlite.prepare('SELECT status FROM cards WHERE id=?').get(card.id).status,'hidden');
+ }finally{f.sqlite.close();}
+});
+
+test('guarded edits refuse source-owned records and malformed compare data without changing cards',async()=>{
+ const f=fixture();try{
+  f.sqlite.prepare('INSERT INTO cards(id,title,description,url,provider,item_id,position,status) VALUES(?,?,?,?,?,?,?,?)').run('photo-card','Source title','Source description','https://photos.example.test/item/photo','guestbook','photo',0,'hidden');
+  const before=JSON.stringify(f.sqlite.prepare('SELECT * FROM cards').all());
+  const expected={title:'Source title',description:'Source description',url:'https://photos.example.test/item/photo',status:'hidden'};
+  assert.equal((await f.request('/api/cards',{id:'photo-card',title:'Overwrite',description:'',url:'https://example.test/',status:'draft',expected})).status,400);
+  const card=await(await f.request('/api/cards',{title:'Fictional',description:'',url:'https://example.test/',status:'draft'})).json();
+  for(const compare of [null,[],{title:'Fictional'}, {...expected,extra:'unsafe'}])assert.equal((await f.request('/api/cards',{id:card.id,title:'Changed',description:'',url:'https://example.test/',status:'draft',expected:compare})).status,400);
+  assert.equal(JSON.stringify(f.sqlite.prepare('SELECT * FROM cards WHERE id=?').all('photo-card')),before);
+ }finally{f.sqlite.close();}
+});
+
+test('canonical URL bounds reject future oversized writes while guarded edits can repair legacy stored URLs',async()=>{
+ const f=fixture();try{
+  const raw='https://example.test/'+'é'.repeat(600),legacy=new URL(raw).href;
+  assert(legacy.length>2048);assert.equal((await f.request('/api/cards',{title:'Fictional',description:'',url:raw,status:'draft'})).status,400);
+  const expected={title:'Fictional legacy',description:'Repairable',url:legacy,status:'hidden'};
+  f.sqlite.prepare('INSERT INTO cards(id,title,description,url,position,status) VALUES(?,?,?,?,?,?)').run('legacy',expected.title,expected.description,expected.url,0,expected.status);
+  assert.equal((await f.request('/api/cards',{id:'legacy',title:expected.title,description:expected.description,url:'https://example.test/repaired',status:'hidden',expected})).status,200);
+  assert.equal(f.sqlite.prepare('SELECT url FROM cards WHERE id=?').get('legacy').url,'https://example.test/repaired');
+  assert.equal((await f.request('/api/cards',{id:'legacy',url:raw,status:'hidden'})).status,400);
+  const huge='https://example.test/'+'x'.repeat(24000),large={...expected,url:huge};f.sqlite.prepare('UPDATE cards SET url=? WHERE id=?').run(huge,'legacy');assert(JSON.stringify(large).length>8192);
+  assert.equal((await f.request('/api/cards',{id:'legacy',title:expected.title,description:expected.description,url:'https://example.test/short',status:'hidden',expected:large})).status,200);
+ }finally{f.sqlite.close();}
+});
