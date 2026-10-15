@@ -117,3 +117,36 @@ test('canonical URL bounds reject future oversized writes while guarded edits ca
   assert.equal((await f.request('/api/cards',{id:'legacy',title:expected.title,description:expected.description,url:'https://example.test/short',status:'hidden',expected:large})).status,200);
  }finally{f.sqlite.close();}
 });
+
+test('owner edit snapshots preserve exact line endings and keep authored HTML inert',async()=>{
+ const f=fixture();try{
+  const expected={title:'Fictional <img src=x onerror=alert(1)>',description:'First\r\nSecond & "quoted" <script>unsafe()</script>',url:'https://example.test/exact',status:'hidden'};
+  assert.equal((await f.request('/api/cards',expected)).status,201);
+  const owner=await(await f.request('/owner')).text(),attribute=owner.match(/data-link-snapshot="([^"]*)"/);
+  assert(attribute);assert.doesNotMatch(attribute[1],/[<>]/);
+  const decoded=attribute[1].replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+  assert.deepEqual(JSON.parse(decoded),expected);
+  const anonymous=await(await f.request('/owner',null,false)).text();assert.doesNotMatch(anonymous,/data-link-snapshot|Fictional &lt;img/);
+ }finally{f.sqlite.close();}
+});
+
+test('a status-only legacy update cannot overwrite a newer guarded content edit',async()=>{
+ const f=fixture();try{
+  const expected={title:'Fictional original',description:'Original note',url:'https://example.test/original',status:'published'};
+  const card=await(await f.request('/api/cards',expected)).json();
+  let started,release;const paused=new Promise(resolve=>started=resolve),gate=new Promise(resolve=>release=resolve),prepare=f.DB.prepare;
+  f.DB.prepare=sql=>{
+   const statement=prepare(sql);
+   if(sql.startsWith('UPDATE cards SET')&&!sql.includes('RETURNING')){
+    const bind=statement.bind;statement.bind=(...values)=>{const bound=bind(...values),run=bound.run;bound.run=async()=>{started();await gate;return run();};return bound;};
+   }
+   return statement;
+  };
+  const hiding=f.request('/api/cards',{id:card.id,status:'hidden'});await paused;
+  const edited={id:card.id,title:'Fictional newer edit',description:'Keep this newer note',url:'https://example.test/newer',status:'published',expected};
+  assert.equal((await f.request('/api/cards',edited)).status,200);
+  release();assert.equal((await hiding).status,200);
+  const saved=f.sqlite.prepare('SELECT * FROM cards WHERE id=?').get(card.id);
+  assert.equal(saved.title,edited.title);assert.equal(saved.description,edited.description);assert.equal(saved.url,edited.url);assert.equal(saved.status,'hidden');
+ }finally{f.sqlite.close();}
+});

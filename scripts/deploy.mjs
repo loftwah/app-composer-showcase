@@ -20,6 +20,8 @@ execFileSync(
   [
     "wrangler",
     "deploy",
+    "--config",
+    "wrangler.jsonc",
     "--define",
     "BUILD_SHA:" + JSON.stringify(sha),
     "--define",
