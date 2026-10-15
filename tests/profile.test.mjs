@@ -53,3 +53,15 @@ test('pinned provider cards still disappear after source revocation, including p
   assert.equal((await (await f.request('/api/cards',null,false)).json()).cards.length,1);visible=false;assert.equal((await (await f.request('/api/cards',null,false)).json()).cards.length,0);assert.doesNotMatch(await (await f.request('/',null,false)).text(),/Fictional public photo|media\/photo/);
  }finally{f.sqlite.close();}
 });
+
+test('concurrent removal cannot recreate orphan presentation or disable a full collection',async()=>{
+ const f=fixture();try{
+  const ids=[];for(let i=0;i<8;i++){const value=await(await f.request('/api/cards',{title:'Fictional '+i,url:'https://example.test/'+i,status:'published'})).json();ids.push(value.id);await f.request('/api/presentation',{id:value.id,pinned:false,icon:'link'});}
+  let started,release;const paused=new Promise(resolve=>started=resolve),gate=new Promise(resolve=>release=resolve);const prepare=f.DB.prepare;
+  f.DB.prepare=sql=>{const statement=prepare(sql);if(sql.startsWith('INSERT INTO settings(id,value)')&&sql.includes('presentation')){const bind=statement.bind;statement.bind=(...values)=>{const bound=bind(...values),first=bound.first;bound.first=async()=>{started();await gate;return first();};return bound;};}return statement;};
+  const pending=f.request('/api/presentation',{id:ids[0],pinned:true,icon:'book'});await paused;
+  assert.equal((await f.request('/api/cards',{id:ids[0],delete:true})).status,200);release();assert.equal((await pending).status,404);f.DB.prepare=prepare;
+  const replacement=await(await f.request('/api/cards',{title:'Replacement fictional link',url:'https://example.test/replacement',status:'published'})).json();assert.equal((await f.request('/api/presentation',{id:replacement.id,pinned:true,icon:'heart'})).status,200);
+  const styles=JSON.parse(f.sqlite.prepare("SELECT value FROM settings WHERE id='presentation'").get().value);assert.equal(Object.keys(styles).length,8);assert.equal(Object.hasOwn(styles,ids[0]),false);assert.equal((await f.request('/api/cards',null,false)).status,200);assert.equal((await f.request('/',null,false)).status,200);assert.equal((await f.request('/api/export')).status,200);
+ }finally{f.sqlite.close();}
+});

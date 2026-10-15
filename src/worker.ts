@@ -118,11 +118,10 @@ const app = {
         if(path==='/api/presentation'){
           if(typeof b.id!=='string'||!/^[a-zA-Z0-9-]{1,64}$/.test(b.id))return error('Choose a current card.');
           const value=decoration({pinned:b.pinned,icon:b.icon});
-          const card=await env.DB.prepare('SELECT id FROM cards WHERE id=?').bind(b.id).first();
-          if(!card)return error('Card not found',404);
           await styles(env); // Preserve malformed existing owner data for review.
           const path='$.'+JSON.stringify(b.id),bytes=JSON.stringify(value);
-          await env.DB.prepare("INSERT INTO settings(id,value) VALUES('presentation',json_object(?,json(?))) ON CONFLICT(id) DO UPDATE SET value=json_set(settings.value,?,json(?))").bind(b.id,bytes,path,bytes).run();
+          const saved=await env.DB.prepare("INSERT INTO settings(id,value) SELECT 'presentation',json_object(?,json(?)) WHERE EXISTS(SELECT 1 FROM cards WHERE id=?) ON CONFLICT(id) DO UPDATE SET value=json_set(settings.value,?,json(?)) RETURNING id").bind(b.id,bytes,b.id,path,bytes).first();
+          if(!saved)return error('Card no longer exists. Refresh the collection.',404);
           return json({ok:true,...value});
         }
         if (path === "/api/reorder") {
