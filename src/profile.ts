@@ -3,16 +3,19 @@
 export {profileFields,profileConfiguration} from '../public/brand/profile-settings-fields.mjs';
 export const iconNames = ['link','book','code','music','video','heart'] as const;
 export type LinkIcon = typeof iconNames[number];
-export type Decoration = {pinned:boolean;icon:LinkIcon};
+export const groupNames=['Music','Games','Projects','Writing','Connect'] as const;
+export const cardLimit=64;
+export type Decoration = {pinned:boolean;icon:LinkIcon;group?:string};
 export const defaultDecoration:Decoration = {pinned:false,icon:'link'};
 export function decoration(input:unknown):Decoration {
   if(!input||typeof input!=='object'||Array.isArray(input))throw Error('Choose a supported link style.');
   const value=input as Record<string,unknown>;
-  if(typeof value.pinned!=='boolean'||!iconNames.includes(value.icon as LinkIcon)||Object.keys(value).some(key=>!['pinned','icon'].includes(key)))throw Error('Choose a supported link style.');
-  return {pinned:value.pinned,icon:value.icon as LinkIcon};
+  if(typeof value.pinned!=='boolean'||!iconNames.includes(value.icon as LinkIcon)||Object.keys(value).some(key=>!['pinned','icon','group'].includes(key)))throw Error('Choose a supported link style.');
+  if(value.group!==undefined&&(typeof value.group!=='string'||value.group!==''&&!groupNames.includes(value.group as typeof groupNames[number])))throw Error('Choose a supported link group.');
+  return {pinned:value.pinned,icon:value.icon as LinkIcon,...(value.group!==undefined?{group:value.group as string}:{})};
 }
 export function presentation(input:unknown):Record<string,Decoration> {
-  if(!input||typeof input!=='object'||Array.isArray(input)||Object.keys(input).length>8)throw Error('The saved link styles need owner review.');
+  if(!input||typeof input!=='object'||Array.isArray(input)||Object.keys(input).length>cardLimit)throw Error('The saved link styles need owner review.');
   return Object.fromEntries(Object.entries(input).map(([id,value])=>{
     if(!/^[a-zA-Z0-9-]{1,64}$/.test(id))throw Error('The saved link styles need owner review.');
     return [id,decoration(value)];

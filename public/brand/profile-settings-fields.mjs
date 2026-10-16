@@ -3,10 +3,13 @@ export const profileFields = [
   {key:'handle',label:'Handle',maxLength:40,default:''},
   {key:'website',label:'Website',maxLength:2048,default:''},
   {key:'github',label:'GitHub',maxLength:2048,default:''},
-  {key:'bluesky',label:'Bluesky',maxLength:2048,default:''},
+  {key:'x',label:'X',maxLength:2048,default:''},
+  {key:'avatar',label:'Profile portrait URL',maxLength:2048,default:'',image:true},
+  {key:'banner',label:'Profile banner URL',maxLength:2048,default:'',image:true},
+  {key:'shareImage',label:'Social preview image URL (1200 × 630)',maxLength:2048,default:'',image:true},
   {key:'linkedin',label:'LinkedIn',maxLength:2048,default:''},
 ];
-const hosts={github:['github.com'],bluesky:['bsky.app'],linkedin:['linkedin.com','www.linkedin.com']};
+const hosts={x:['x.com','twitter.com'],github:['github.com'],bluesky:['bsky.app'],linkedin:['linkedin.com','www.linkedin.com']};
 export function profileConfiguration(input,previous={}) {
   const result={...previous};
   for(const [key,max] of [['title',80],['intro',240]]){
@@ -16,7 +19,7 @@ export function profileConfiguration(input,previous={}) {
   }
   if(!result.title)throw Error('Give your profile a title.');
   if(typeof input.theme!=='string'||!['daylight','midnight'].includes(input.theme))throw Error('Choose a supported theme.');
-  if(typeof input.layout!=='string'||!['grid','editorial','compact'].includes(input.layout))throw Error('Choose a supported layout.');
+  if(typeof input.layout!=='string'||!['grid','editorial','compact','profile'].includes(input.layout))throw Error('Choose a supported layout.');
   result.theme=input.theme;result.layout=input.layout;
   for(const field of profileFields){
     if(!Object.hasOwn(input,field.key))continue; // Older settings clients preserve these fields.
@@ -30,13 +33,19 @@ export function profileConfiguration(input,previous={}) {
       if(!value){result[field.key]='';continue;}
       let url;try{url=new URL(value);}catch{throw Error('Use a full HTTPS address for '+field.label+'.');}
       if(url.href.length>field.maxLength||url.protocol!=='https:'||url.username||url.password||hosts[field.key]&&!hosts[field.key].includes(url.hostname))throw Error('Use an HTTPS '+field.label+' address without embedded credentials.');
+      if(field.image&&!/^[a-zA-Z0-9.:/\[\]-]+$/.test(url.origin))throw Error('Use an image address with a valid HTTPS hostname.');
       result[field.key]=url.href;
     }
+  }
+  if(Object.hasOwn(input,'bluesky')){
+    const value=input.bluesky;if(typeof value!=='string'||value.length>2048)throw Error('Check the legacy profile setting.');
+    if(value){let u;try{u=new URL(value);}catch{throw Error('Check the legacy profile setting.');}if(u.protocol!=='https:'||u.username||u.password||u.hostname!=='bsky.app')throw Error('Check the legacy profile setting.');}
+    result.bluesky=value;
   }
   return result;
 }
 export const profileFileFormat='linkarooie.profile-settings';
-export const profileSettingKeys=['title','intro','theme','layout',...profileFields.map(field=>field.key)];
+export const profileSettingKeys=['title','intro','theme','layout','handle','website','github','bluesky','linkedin'];
 const byteLength=value=>new TextEncoder().encode(value).byteLength;
 const exact=(value,keys)=>!!value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).length===keys.length&&keys.every(key=>Object.hasOwn(value,key));
 export class ProfilePortabilityError extends Error {
