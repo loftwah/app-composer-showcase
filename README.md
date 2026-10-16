@@ -89,3 +89,5 @@ Native Composer parity: manifest `profileSettings` version1 advertises the fixed
 ## Creator profiles
 
 The optional `profile` layout uses an owner-selected portrait, banner and social preview, eight featured picks and grouped Music/Games/Projects/Writing/Connect discovery across up to64 existing cards. Other layouts and source-controlled photo eligibility remain available. Configure image URLs and X in the owner studio or the reviewed Composer settings; images require public HTTPS addresses. No personal creator is the default. See [asset provenance and settings-file scope](docs/brand/provenance.md). Exact release and current reference curation evidence belongs in Composer issue11.
+
+The shared header keeps theme switching as a quiet current-mode sun/moon icon. Preserve the stable Dark theme accessible toggle name, pressed state, keyboard focus, 44px target and existing saved-preference key. Keep the secondary control class so light-theme primary-button rules cannot override its foreground.
