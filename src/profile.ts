@@ -1,45 +1,10 @@
 // Profile/link presentation adapted from Linkarooie 3's typed shape and Rails
 // pinning semantics. Values are data; no legacy modules, trackers or hidden DOM.
-export const profileFields = [
-  {key:'handle',label:'Handle',maxLength:40,default:''},
-  {key:'website',label:'Website',maxLength:2048,default:''},
-  {key:'github',label:'GitHub',maxLength:2048,default:''},
-  {key:'bluesky',label:'Bluesky',maxLength:2048,default:''},
-  {key:'linkedin',label:'LinkedIn',maxLength:2048,default:''},
-] as const;
+export {profileFields,profileConfiguration} from '../public/brand/profile-settings-fields.mjs';
 export const iconNames = ['link','book','code','music','video','heart'] as const;
 export type LinkIcon = typeof iconNames[number];
 export type Decoration = {pinned:boolean;icon:LinkIcon};
 export const defaultDecoration:Decoration = {pinned:false,icon:'link'};
-const hosts:Record<string,string[]>={github:['github.com'],bluesky:['bsky.app'],linkedin:['linkedin.com','www.linkedin.com']};
-export function profileConfiguration(input:Record<string,unknown>,previous:Record<string,unknown>={}) {
-  const result:Record<string,unknown>={...previous};
-  for(const [key,max] of [['title',80],['intro',240]] as const){
-    const value=input[key];
-    if(typeof value!=='string'||value.length>max||/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(value))throw Error('Check the '+key+' text.');
-    result[key]=value.trim();
-  }
-  if(!result.title)throw Error('Give your profile a title.');
-  if(typeof input.theme!=='string'||!['daylight','midnight'].includes(input.theme))throw Error('Choose a supported theme.');
-  if(typeof input.layout!=='string'||!['grid','editorial','compact'].includes(input.layout))throw Error('Choose a supported layout.');
-  result.theme=input.theme;result.layout=input.layout;
-  for(const field of profileFields){
-    if(!Object.hasOwn(input,field.key))continue; // Older settings clients preserve these fields.
-    const raw=input[field.key];
-    if(typeof raw!=='string'||raw.length>field.maxLength||/[\u0000-\u001f]/.test(raw))throw Error('Check your '+field.label+' value.');
-    const value=raw.trim();
-    if(field.key==='handle'){
-      if(value&&!/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,39}$/.test(value))throw Error('Use letters, numbers, dots, underscores or hyphens for the handle.');
-      result[field.key]=value;
-    }else{
-      if(!value){result[field.key]='';continue;}
-      let url:URL;try{url=new URL(value);}catch{throw Error('Use a full HTTPS address for '+field.label+'.');}
-      if(url.href.length>field.maxLength||url.protocol!=='https:'||url.username||url.password||hosts[field.key]&&!hosts[field.key].includes(url.hostname))throw Error('Use an HTTPS '+field.label+' address without embedded credentials.');
-      result[field.key]=url.href;
-    }
-  }
-  return result;
-}
 export function decoration(input:unknown):Decoration {
   if(!input||typeof input!=='object'||Array.isArray(input))throw Error('Choose a supported link style.');
   const value=input as Record<string,unknown>;
