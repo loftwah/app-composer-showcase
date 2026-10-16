@@ -5,13 +5,14 @@ const keys=Object.keys(labels),supported=value=>!!value&&typeof value==='object'
 export function setupProfileSettings({base,lock,isBusy,registerDraft}){
  const studio=document.querySelector('#profile-portability'),configForm=document.querySelector('#config');if(!studio||!configForm)return;
  const form=studio.querySelector('form'),input=form.elements.namedItem('file'),comparison=studio.querySelector('[data-settings-comparison]'),diff=studio.querySelector('[data-settings-diff]'),apply=studio.querySelector('[data-apply-settings]'),cancel=studio.querySelector('[data-cancel-settings]'),status=studio.querySelector('[data-portability-status]');
- const formValues=()=>Object.fromEntries(keys.map(key=>[key,configForm.elements.namedItem(key)?.value??'']));
+ const formKeys=[...configForm.elements].filter(control=>control.name&&'value'in control).map(control=>control.name);
+ const formValues=()=>Object.fromEntries(formKeys.map(key=>[key,configForm.elements.namedItem(key).value]));
  let formBaseline=JSON.stringify(formValues()),file=null,review=null,needsReview=true;
  configForm.addEventListener('linkarooie:settings-saved',event=>{
-  const {submitted,saved}=event.detail??{};if(!submitted||!saved)return;const known=Object.fromEntries(keys.map(key=>[key,saved[key]]));if(!supported(known))return;
+  const {submitted,saved}=event.detail??{};if(!submitted||!saved)return;const known=Object.fromEntries(formKeys.map(key=>[key,saved[key]]));if(!formKeys.every(key=>typeof known[key]==='string'))return;
   // Preserve any edit made while the ordinary request was pending. Advance
   // only confirmed saved values, including the server's normalization.
-  for(const key of keys){const control=configForm.elements.namedItem(key);if(control.value===submitted[key])control.value=known[key];}
+  for(const key of formKeys){const control=configForm.elements.namedItem(key);if(control.value===submitted[key])control.value=known[key];}
   formBaseline=JSON.stringify(known);
  });
  registerDraft(()=>configForm.dataset.saving==='true'||JSON.stringify(formValues())!==formBaseline);
@@ -53,7 +54,7 @@ export function setupProfileSettings({base,lock,isBusy,registerDraft}){
   try{
    const value=await request({action:'apply',file,expected:review.before});
    if(value.ok!==true||value.saved!==true||!supported(value.config))throw Error('The result could not be confirmed. Review the saved settings before continuing.');
-   for(const key of keys)configForm.elements.namedItem(key).value=value.config[key];
+   for(const key of keys){const control=configForm.elements.namedItem(key);if(control)control.value=value.config[key];}
    formBaseline=JSON.stringify(formValues());reset();input.value='';show('Profile settings applied. Save any other edits before refreshing to see the updated appearance.');status.focus();
   }catch(error){show((error.name==='TimeoutError'?'The save timed out and may have completed.':error.message||'The save could not be confirmed.')+' Review this file again to compare the saved settings before another apply.');status.focus();}
   finally{studio.removeAttribute('aria-busy');unlock();state();}
