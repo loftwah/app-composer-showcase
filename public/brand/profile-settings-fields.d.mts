@@ -1,7 +1,7 @@
 export type ProfileSettingKey='title'|'intro'|'theme'|'layout'|'handle'|'website'|'github'|'bluesky'|'linkedin';
 export type ProfileValues=Record<ProfileSettingKey,string>;
 export type ProfileSettingsFile={format:'linkarooie.profile-settings';version:1;config:ProfileValues};
-export const profileFields:{key:'handle'|'website'|'github'|'bluesky'|'linkedin';label:string;maxLength:number;default:string}[];
+export const profileFields:{key:'handle'|'website'|'github'|'x'|'linkedin'|'avatar'|'banner'|'shareImage';label:string;maxLength:number;default:string;image?:boolean}[];
 export function profileConfiguration(input:Record<string,unknown>,previous?:Record<string,unknown>):Record<string,unknown>;
 export const profileFileFormat:'linkarooie.profile-settings';
 export const profileSettingKeys:ProfileSettingKey[];

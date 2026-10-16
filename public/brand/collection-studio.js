@@ -140,14 +140,14 @@ if (cards) {
   });
 // Link presentation is saved independently from card content and visibility.
 for(const form of document.querySelectorAll('[data-presentation-card]')){
- const markSaved=watch(form,['icon','pinned']);
+ const markSaved=watch(form,['icon','pinned','group']);
  form.addEventListener('submit',async event=>{
   event.preventDefault();const output=form.querySelector('[role=status]');
   const data=new FormData(form),unlock=lock();if(!unlock)return;
   try{
-   const response=await fetch(base+'/api/presentation',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:form.closest('[data-card]').dataset.card,pinned:data.has('pinned'),icon:data.get('icon')})});
+   const response=await fetch(base+'/api/presentation',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:form.closest('[data-card]').dataset.card,pinned:data.has('pinned'),icon:data.get('icon'),group:data.get('group')})});
    const result=await response.json();if(!response.ok)throw Error(result.error||'Could not save the link style.');
-   markSaved(fields(form,['icon','pinned']));output.textContent='Link style saved. Content and visibility are unchanged.';
+   markSaved(fields(form,['icon','pinned','group']));output.textContent='Link style saved. Content and visibility are unchanged.';
   }catch(error){output.textContent=error.message||'Could not save the link style. Your selections are kept here.';}
   finally{unlock();}
  });

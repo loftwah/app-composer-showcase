@@ -150,3 +150,50 @@ test('a status-only legacy update cannot overwrite a newer guarded content edit'
   assert.equal(saved.title,edited.title);assert.equal(saved.description,edited.description);assert.equal(saved.url,edited.url);assert.equal(saved.status,'hidden');
  }finally{f.sqlite.close();}
 });
+
+test('creator collection holds 64 cards, limits featured picks to eight, and preserves groups for older clients',async()=>{
+ const f=fixture();try{
+  const ids=[];
+  for(let i=0;i<64;i++){const response=await f.request('/api/cards',{title:'Fictional '+i,description:'A public project',url:'https://example.test/'+i,status:i===63?'draft':'published'});assert.equal(response.status,201);ids.push((await response.json()).id);}
+  assert.equal((await f.request('/api/cards',{title:'Too many',url:'https://example.test/overflow'})).status,409);
+  assert.equal((await f.request('/api/reorder',{ids:[...ids].reverse()})).status,200);
+  for(let i=0;i<8;i++)assert.equal((await f.request('/api/presentation',{id:ids[i],pinned:true,icon:'music',group:'Music'})).status,200);
+  assert.equal((await f.request('/api/presentation',{id:ids[8],pinned:true,icon:'music',group:'Music'})).status,409);
+  assert.equal((await f.request('/api/presentation',{id:ids[0],pinned:true,icon:'book'})).status,200);
+  const exported=await(await f.request('/api/export')).json();assert.equal(exported.cards.find(card=>card.id===ids[0]).group,'Music');
+  assert.equal((await f.request('/api/presentation',{id:ids[8],pinned:false,icon:'music',group:'<script>'})).status,400);
+  const cards=await(await f.request('/api/cards',null,false)).json();assert.equal(cards.cards.length,63);assert.equal(cards.cards.filter(card=>card.pinned).length,8);
+ }finally{f.sqlite.close();}
+});
+
+test('creator view shows approved profile assets, grouped cards and personal sharing while keeping drafts and legacy social out',async()=>{
+ const f=fixture();try{
+  const config={...cfg,title:'A real profile',layout:'profile',x:'https://x.com/example',avatar:'https://showcase.example.test/brand/avatar.jpg',banner:'https://showcase.example.test/brand/banner.jpg',shareImage:'https://showcase.example.test/brand/share.jpg',bluesky:'https://bsky.app/profile/legacy'};
+  assert.equal((await f.request('/api/config',config)).status,200);
+  const card=await(await f.request('/api/cards',{title:'A music project',description:'Listen here',url:'https://example.test/music',status:'published'})).json();
+  await f.request('/api/presentation',{id:card.id,pinned:false,icon:'music',group:'Music'});
+  await f.request('/api/cards',{title:'Private unreleased project',url:'https://example.test/private',status:'draft'});
+  const response=await f.request('/',null,false),html=await response.text();assert.match(html,/class="creator-avatar"/);assert.match(html,/class="creator-banner"/);assert.match(html,/id="links-music"/);assert.match(html,/href="https:\/\/x.com\/example"/);assert.match(html,/name="twitter:image" content="https:\/\/showcase.example.test\/brand\/share.jpg"/);assert.doesNotMatch(html,/Private unreleased|bsky.app|Bluesky/);assert.match(response.headers.get('Content-Security-Policy'),/img-src[^;]*https:\/\/showcase.example.test/);
+  const before=await(await f.request('/api/export')).json(),file=await(await f.request('/api/profile-settings')).json();assert.equal(file.version,1);assert.equal(file.config.layout,'profile');assert(!Object.hasOwn(file.config,'avatar'));
+  const review=await(await f.request('/api/profile-settings',{action:'review',file})).json();assert.equal(review.ok,true);assert.equal((await f.request('/api/profile-settings',{action:'apply',file,expected:review.before})).status,200);
+  const after=await(await f.request('/api/export')).json();assert.deepEqual(after,before);
+ }finally{f.sqlite.close();}
+});
+
+test('simultaneous pin writes cannot exceed the featured limit or lose another card style',async()=>{
+ const f=fixture();try{
+  const ids=[];for(let i=0;i<9;i++)ids.push((await(await f.request('/api/cards',{title:'Fictional '+i,url:'https://example.test/'+i,status:'published'})).json()).id);
+  for(let i=0;i<7;i++)await f.request('/api/presentation',{id:ids[i],pinned:true,icon:'link',group:'Projects'});
+  let release,started;const paused=new Promise(done=>started=done),gate=new Promise(done=>release=done),prepare=f.DB.prepare;let intercepted=false;
+  f.DB.prepare=sql=>{const statement=prepare(sql);if(sql.startsWith('INSERT INTO settings(id,value)')&&sql.includes('presentation')){const bind=statement.bind;statement.bind=(...values)=>{const bound=bind(...values),first=bound.first;if(!intercepted){intercepted=true;bound.first=async()=>{started();await gate;return first();};}return bound;};}return statement;};
+  const pending=f.request('/api/presentation',{id:ids[7],pinned:true,icon:'book',group:'Writing'});await paused;
+  assert.equal((await f.request('/api/presentation',{id:ids[8],pinned:true,icon:'music',group:'Music'})).status,200);release();assert.equal((await pending).status,409);
+  const cards=(await(await f.request('/api/export')).json()).cards;assert.equal(cards.filter(card=>card.pinned).length,8);assert.equal(cards.find(card=>card.id===ids[8]).group,'Music');
+ }finally{f.sqlite.close();}
+});
+
+test('profile image hostnames cannot inject content-security-policy directives',async()=>{
+ for(const key of ['avatar','banner','shareImage'])assert.throws(()=>profileConfiguration({...cfg,[key]:'https://example.test;form-action/'}));
+ const {html}=await import('../src/common.ts');const response=html('Profile','<h1>Profile</h1>','','showcase','midnight','Bio','https://showcase.example.test','/','https://photos.example.test',{avatar:'https://example.test;form-action/',banner:'https://evil.example.test/'});
+ const policy=response.headers.get('Content-Security-Policy');assert(!policy.includes('example.test;form-action'));assert.equal((policy.match(/(?:^|;)\s*form-action /g)||[]).length,1);assert.match(policy,/form-action 'self'/);
+});
