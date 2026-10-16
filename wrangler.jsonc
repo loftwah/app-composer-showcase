@@ -30,7 +30,8 @@
     "PUBLIC_ORIGIN": "https://showcase.loftwah.com",
     "PROVIDER_ORIGIN": "https://guestbook.loftwah.com",
     "PROVIDER_ID": "guestbook",
-    "PROVIDER_MOUNT": "/guestbook"
+    "PROVIDER_MOUNT": "/guestbook",
+    "OWNER_STUDIO_URL": "https://composer.loftwah.com/_emdash/admin/plugins/composer-miniapps/apps?app=showcase"
   },
   "services": [
     {
