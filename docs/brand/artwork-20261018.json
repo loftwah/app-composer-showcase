@@ -103,6 +103,46 @@
       "path": "public/brand/space-latin-20261018.woff2",
       "bytes": 49204,
       "sha256": "61d00a1c57fcd7d4826c7a69cd85b61d15d133d5471d3c9c4731d70193d9f71f"
+    },
+    {
+      "path": "public/brand/apps/herethere-small-20261018.webp",
+      "bytes": 2896,
+      "sha256": "4fec95fe6cfccd8b901c8f424599f4cb57aea6ad2eb11f56e79b95a57260b568"
+    },
+    {
+      "path": "public/brand/apps/linkcheck-small-20261018.webp",
+      "bytes": 4238,
+      "sha256": "be9d5e7b8f24ec6d8b8d073075e3208dbd3e68afc78ecc00c9184882f98b0326"
+    },
+    {
+      "path": "public/brand/apps/hello-small-20261018.webp",
+      "bytes": 1826,
+      "sha256": "c2aef7354c04affc6060d095912307794cc5436acff8a45d26c913b989222db1"
+    },
+    {
+      "path": "public/brand/apps/carryforward-small-20261018.webp",
+      "bytes": 2364,
+      "sha256": "d684c61b50c8f1c44eefc376c232fb9192c40d4b80365eb971a3ad1684add88c"
+    },
+    {
+      "path": "public/brand/composer-icon-20261018-96.png",
+      "bytes": 15943,
+      "sha256": "b20dd22c890237c48a1e47e81fef1e715b5d77968bdeeb624ba0eceb1ae47b66"
+    },
+    {
+      "path": "public/brand/creators/loftwah-share-20261018.jpg",
+      "bytes": 163425,
+      "sha256": "5cef4e4d65784585c90d1e77a18a6c6ec98642557259c38bcb8bbad0b5c0a7d1"
+    },
+    {
+      "path": "public/brand/creators/loftwah-share-20261018.webp",
+      "bytes": 117668,
+      "sha256": "6f873bbab0cf99e4388d87cd8356be1931aeb096d6c173c61562722f9bedb323"
+    },
+    {
+      "path": "public/brand/creators/loftwah-share-20261018-600.webp",
+      "bytes": 40328,
+      "sha256": "10571a45791848794ce8a2e9b37a077194998d255278a8c1ce3e19742da3261c"
     }
   ]
 }
