@@ -35,15 +35,15 @@ Content is centred within (1248px). The two-column hero stacks below (820px); th
 
 ## Elevation & Depth
 
-The collection is flat: tonal surfaces, rules and image placement supply hierarchy. Keep the cut-paper illustration separate from published contributions rather than treating it as collection content.
+The collection is flat: tonal surfaces, rules and image placement supply hierarchy. Keep the hero illustration separate from published contributions rather than treating it as collection content.
 
 ## Shapes
 
 Use softly rounded controls and media, thin borders and fixed functional SVG geometry. The eight selectable link symbols are link, book, code, music, video, game, heart and star; pinning also has a readable “Pinned” label.
 
-### Cut-paper artwork and section symbols
+### Hero artwork and section symbols
 
-Reviewed 17 October 2026. The public hero, the default social card and the app icon are the reviewed cut-paper screenprint set: warm ivory paper, graphite ink and one short burnt-orange paper chain beside a green paper kangaroo. The square master renders in a reserved 1:1 box with a hairline border and a maximum width of (560px); the social card is 1200 × 630. Keep the illustration separate from published content, and keep the hand-authored chain-ring `mark.svg` for favicon and mount identity. Exact files, request identity and removals are in `public/brand/linkarooie-art-v3.PROVENANCE.txt`.
+Reviewed 17 October 2026. The public hero, the default social card and the app icon are the reviewed ink-line cel animation set: a deep ink-blue night workshop, a red kangaroo working an eccentric signal selector and holding up one chosen transmission, with acid-green accents only on the chosen card and a couple of dial lights. The square master renders in a reserved 1:1 box with a hairline border and a maximum width of (560px); the social card is 1200 × 630. Keep the illustration separate from published content, and keep the authored interlocking-link `mark.svg` for favicon and mount identity. Exact files, request identity and removals are recorded in `docs/brand/provenance.md` and the owning App Composer repository.
 
 Each profile section title leads with the fixed symbol of the group it names (Featured star, Music, Games, Code, Writing, Connect link), in the theme accent at (22px), reduced to (19px) on phones. Symbols are decorative: the group name stays the accessible text. Both the link and milestone pickers offer the same eight symbols; older saves that used the heart keep rendering it, so no stored style is invalidated.
 

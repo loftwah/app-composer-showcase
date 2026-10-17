@@ -10,7 +10,7 @@ Owner entry is `/owner`. This instance sets `OWNER_STUDIO_URL` to its existing C
 
 ## Public project standard
 
-Reviewed 13 October 2026. The app supplies saved reader dark/light themes, native app navigation with Ctrl/Cmd+K and ordinary links, visible keyboard focus, phone layouts, favicon/touch icon and page-specific social metadata. Original cut-paper App Composer artwork is retained with its recorded request and file inventory (`public/brand/linkarooie-art-v3.PROVENANCE.txt`); functional icons remain vectors. These features do not widen signup, owner access or disclosure permissions.
+Reviewed 13 October 2026. The app supplies saved reader dark/light themes, native app navigation with Ctrl/Cmd+K and ordinary links, visible keyboard focus, phone layouts, favicon/touch icon and page-specific social metadata. Original ink-line cel animation App Composer artwork is retained with its recorded request and file inventory (hashes in `docs/brand/provenance.md`; the request record lives in the owning App Composer repository); functional icons remain vectors. These features do not widen signup, owner access or disclosure permissions.
 
 Contributions: [Contributing](CONTRIBUTING.md), [Code of Conduct](CODE_OF_CONDUCT.md), [Security](SECURITY.md), [Accessibility](ACCESSIBILITY.md). Physical-device, screen-reader and full platform sharing acceptance remain distinct from browser checks.
 

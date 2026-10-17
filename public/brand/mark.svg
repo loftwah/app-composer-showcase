@@ -1,11 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Linkarooie">
   <rect width="64" height="64" rx="14" fill="#f4f0e8"/>
-  <g transform="rotate(-45 32 32)" fill="none" stroke="#252923" stroke-width="11">
-    <rect x="10" y="25.5" width="22" height="13" rx="6.5"/>
-    <rect x="32" y="25.5" width="22" height="13" rx="6.5"/>
+  <rect x="2.5" y="2.5" width="59" height="59" rx="12" fill="none" stroke="#1d2330" stroke-width="3"/>
+  <g transform="rotate(-45 32 32)" fill="none" stroke="#1d2330" stroke-width="11">
+    <rect x="9" y="25.5" width="23" height="13" rx="6.5"/>
+    <rect x="32" y="25.5" width="23" height="13" rx="6.5"/>
   </g>
   <g transform="rotate(-45 32 32)" fill="none" stroke="#a5fd0e" stroke-width="5">
-    <rect x="10" y="25.5" width="22" height="13" rx="6.5"/>
-    <rect x="32" y="25.5" width="22" height="13" rx="6.5"/>
+    <rect x="9" y="25.5" width="23" height="13" rx="6.5"/>
+    <rect x="32" y="25.5" width="23" height="13" rx="6.5"/>
   </g>
 </svg>
