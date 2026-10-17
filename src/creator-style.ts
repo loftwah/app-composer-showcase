@@ -9,5 +9,20 @@ header.creator-header .app-tools{width:auto;flex-wrap:nowrap;margin-left:auto;ga
 header.creator-header nav{order:3;width:100%;gap:8px 20px}
 @media(max-width:700px){header.creator-header{padding-block:12px}header.creator-header .linkarooie-brand{font-size:20px;gap:4px}header.creator-header .linkarooie-brand img{width:30px;height:36px}header.creator-header .app-tools [data-open-apps]{padding-inline:10px}main{padding-top:18px}}
 
+/* Phone visitors reach a complete featured pick without spending the first
+   screen on separate portrait, identity and discovery blocks. */
+@media(max-width:700px){
+ .creator-identity{display:grid;grid-template-columns:64px minmax(0,1fr);gap:10px 14px;padding:12px 0 16px}
+ .creator-avatar{width:64px;height:64px;margin:-36px 0 0;grid-column:1;grid-row:1}
+ .creator-heading{grid-column:2;grid-row:1;align-self:center}
+ .creator-identity:not(:has(.creator-avatar)) .creator-heading{grid-column:1/-1}
+ .creator-identity--bare .creator-avatar{margin:0}
+ .creator-heading h1{font-size:30px}
+ .creator-bio,.creator-identity .profile-social,.creator-identity .profile-share{grid-column:1/-1;margin:0}
+ .creator-search{margin-top:16px}
+ .creator-search label{font-size:14px}
+ .creator-search input{font-size:16px}
+ .creator-section-title{margin-bottom:10px}
+}
 @media(prefers-reduced-motion:reduce){.creator-link{transition:none}}
 `;
