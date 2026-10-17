@@ -57,8 +57,8 @@ test("mounted navigation and saved theme stay in the composition before painting
 // A composed route must share its own art rather than another host's root asset.
 test("social image resolves inside the actual app mount",async()=>{
  const body=await html("Fixture","","/showcase","showcase","midnight","Description","https://composer.loftwah.com","/").text();
- assert.match(body,/property="og:image" content="https:\/\/composer.loftwah.com\/showcase\/brand\/showcase-share-v2.jpg"/);
- assert.match(body,/name="twitter:image" content="https:\/\/composer.loftwah.com\/showcase\/brand\/showcase-share-v2.jpg"/);
+ assert.match(body,/property="og:image" content="https:\/\/composer.loftwah.com\/showcase\/brand\/linkarooie-share-v3.jpg"/);
+ assert.match(body,/name="twitter:image" content="https:\/\/composer.loftwah.com\/showcase\/brand\/linkarooie-share-v3.jpg"/);
  assert.match(body,/og:image:width" content="1200"/);
 });
 

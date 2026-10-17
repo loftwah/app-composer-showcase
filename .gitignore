@@ -3,6 +3,7 @@ node_modules/
 .private/
 .dev.vars*
 .env*
+.playwright-mcp/
 
 dist/
 output/

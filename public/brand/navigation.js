@@ -83,22 +83,27 @@ search.addEventListener("keydown", (e) => {
 const gallerySearch = document.querySelector("#gallery-search");
 if (gallerySearch) {
   const items = [...document.querySelectorAll("[data-gallery-item]")],
+    unique = new Set(items.map((item) => item.dataset.galleryId ?? item)),
     type = document.querySelector("#gallery-type"),
     status = document.querySelector("#gallery-count"),
     empty = document.querySelector("#gallery-empty");
   function filterGallery() {
+    const query = gallerySearch.value.trim().toLowerCase(),
+      kind = type?.value || "";
     const shown = new Set();
     for (const item of items) {
       item.hidden = !(
-        item.textContent
-          .toLowerCase()
-          .includes(gallerySearch.value.trim().toLowerCase()) &&
-        (!type?.value || item.dataset.kind === type.value)
+        item.textContent.toLowerCase().includes(query) &&
+        (!kind || item.dataset.kind === kind)
       );
       if (!item.hidden) shown.add(item.dataset.galleryId ?? item);
     }
     const count = shown.size;
-    status.textContent = `${count} ${count === 1 ? "item" : "items"} shown`;
+    // Silence is the honest default: a count only means something once filtered.
+    status.textContent =
+      query || kind
+        ? `${count} of ${unique.size} ${unique.size === 1 ? "item" : "items"} shown`
+        : "";
     empty.hidden = items.length === 0 || count !== 0;
   }
   gallerySearch.addEventListener("input", filterGallery);

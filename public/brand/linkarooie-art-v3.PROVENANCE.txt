@@ -1,0 +1,51 @@
+Original App Composer cut-paper artwork — Linkarooie
+Reviewed 17 October 2026.
+
+Source: one generated raster, "tile-linkarooie-v4", produced through the fal.ai queue endpoint
+openai/gpt-image-2.5/sunburst/text-to-image under MP's authorisation, request
+01a147de-1cbd-7a03-9297-adf754cdbc42. The request itself, its prompt, the cost basis and the
+review of every rejected image are recorded in the owning App Composer repository at
+public/brand/apps/provenance.json, .artwork/tile-linkarooie-v4.json and the per-job
+.artwork/masters/tile-linkarooie-v4.result.json. FAL_AI_API_KEY is read from the environment by
+scripts/generate-app-art.mjs; it is never printed, never written to a manifest, never committed
+and never shipped to the browser.
+
+Art direction: App Composer cut-paper screenprint — warm ivory paper #f4f0e8, graphite ink
+#252923, burnt orange #d95022, with lime #a5fd0e as this app's accent. Flat shapes, ink-lined
+paper edges, coarse screenprint grain, deliberate registration offset. No shading, perspective,
+gloss, gradients or glow. Subject: one green paper kangaroo in mid-hop with one short
+burnt-orange paper chain drawn separately ahead of it. The first revision attempt coiled the
+orange ribbon out of the tail and read as a curled tail rather than a link at 48 pixels; it was
+rejected and this revision replaced it. The chain stands for the links the owner collects and is
+never presented as a screenshot or as published content.
+
+Files in this repository, all exported from the master at review time:
+- linkarooie-art-v3-master.png — the reviewed master, square; byte-identical to the reviewed
+  .artwork/masters/tile-linkarooie-v4-1.png recorded by App Composer.
+- linkarooie-art-v3-480.webp and linkarooie-art-v3-960.webp — 480px and 960px page hero
+  derivatives, one square tile with a reserved 1:1 layout box and a hairline border.
+- linkarooie-share-v3.jpg — 1200x630 JPEG social derivative. The same bytes are this app's card
+  in the App Composer catalogue (public/brand/apps/linkarooie-share-v3.jpg there), so the product
+  page and the catalogue describe the app with one card.
+- linkarooie-share-v3.webp and linkarooie-share-v3-600.webp — 1200x630 and 600x315 WebP variants.
+- apps/linkarooie-small-v3.webp — 96px navigation crop of the same square artwork.
+
+Dimensions are reserved in the markup. The illustration is explicitly separate from the
+collection: it is never presented as a card, a featured contribution or a screenshot.
+
+mark.svg and icon.png are authored, not generated: hand-written SVG geometry of two interlocked
+chain rings in the same paper grammar, plus a 512px flat ivory rendering of that same mark for
+apple-touch-icon. No traced third-party mark, logo or vendor icon is used.
+
+Superseded in this release and removed from the repository: the 14 October 2026 glossy
+showcase-character-v2 pair (600/1200px WebP with its provenance and prompt files), the generated
+courtyard-ai-v1 and share-ai-v1 poster pairs, the 13 October icon.png and the v1/v2 navigation
+crops from the earlier generated set. They mixed glossy postcard renders with the current
+cut-paper grammar. Their bytes and prompts remain in this repository's git history; the reviewed
+App Composer record keeps the comparison note.
+
+The portrait, concert banner, reference share card and neon kangaroo under
+public/brand/creators/ are Loftwah's own configured identity assets and stay byte-for-byte, as
+docs/brand/provenance.md records.
+
+Licence for these original project assets: MIT, like this repository.

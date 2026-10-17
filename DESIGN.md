@@ -5,11 +5,13 @@ colors: {
   charcoal: "#17181b", dark-text: "#f2f3f5", dark-muted: "#afb3bb", dark-surface: "#23252a",
   dark-field: "#1d1f23", dark-border: "#444952", dark-control: "#797f8a", orange: "#ff9b55",
   warm-light: "#faf9f7", light-text: "#22252b", light-muted: "#5c616a", light-surface: "#efeeea",
-  light-field: "#fff", light-border: "#d3d1cc", light-control: "#747983", burnt-orange: "#a63d08"
+  light-field: "#fff", light-border: "#d3d1cc", light-control: "#747983", burnt-orange: "#a63d08",
+  lime: "#a5fd0e", purple: "#7e22ce", paper: "#f4f0e8", graphite: "#252923"
 }
 typography:
   headline: {fontFamily: "Space, system-ui", lineHeight: 1.1, letterSpacing: "-.025em"}
   body: {fontFamily: "system-ui, sans-serif", fontSize: "16px", lineHeight: 1.55}
+  profile-headline: {fontFamily: "Inter, system-ui", fontWeight: 750, letterSpacing: "-.035em"}
   milestone-title: {fontFamily: "Space, system-ui", fontSize: "22px", fontWeight: 600, lineHeight: 1.3}
 rounded: {field: "6px", card: "8px", dialog: "12px"}
 ---
@@ -17,7 +19,7 @@ rounded: {field: "6px", card: "8px", dialog: "12px"}
 
 ## Overview
 
-Preserve the incumbent editorial collection: illustrated hero, readable profile identity and published picks. Linkarooie is the public app identity; owner-authored titles and the original magpie/shelf artwork remain. Repository, app and route IDs stay `showcase`. Source: `src/common.ts`, `src/profile.ts`, `src/worker.ts` and `docs/linkarooie-provenance.md`.
+Preserve the incumbent editorial collection: illustrated hero, readable profile identity and published picks. Linkarooie is the public app identity; owner-authored titles remain. Repository, app and route IDs stay `showcase`. Source: `src/common.ts`, `src/profile.ts`, `src/worker.ts` and `docs/linkarooie-provenance.md`.
 
 ## Colors
 
@@ -25,7 +27,7 @@ Dark is the default; the saved light choice uses warm-light surfaces. Orange mar
 
 ## Typography
 
-Self-hosted Space supplies headings, collection labels and compact titles; system type supplies prose and controls. The hero uses a responsive display heading, the bio a quieter lede, and compact titles a medium-weight (24px) heading reduced to (21px) on phones.
+Self-hosted Space supplies headings, collection labels and compact titles; system type supplies prose and controls. The profile layout uses the co-located Inter faces for its name, handle and bio, keeping the lime (dark) or purple (light) accent on the wordmark and handles. The hero uses a responsive display heading, the bio a quieter lede, and compact titles a medium-weight (24px) heading reduced to (21px) on phones.
 
 ## Layout
 
@@ -33,11 +35,19 @@ Content is centred within (1248px). The two-column hero stacks below (820px); th
 
 ## Elevation & Depth
 
-The collection is flat: tonal surfaces, rules and image placement supply hierarchy. Retain the existing illustration separately from published contributions rather than treating it as collection content.
+The collection is flat: tonal surfaces, rules and image placement supply hierarchy. Keep the cut-paper illustration separate from published contributions rather than treating it as collection content.
 
 ## Shapes
 
-Use softly rounded controls and media, thin borders and fixed functional SVG geometry. The six selectable link symbols are link, book, code, music, video and heart; pinning also has a readable “Pinned” label.
+Use softly rounded controls and media, thin borders and fixed functional SVG geometry. The eight selectable link symbols are link, book, code, music, video, game, heart and star; pinning also has a readable “Pinned” label.
+
+### Cut-paper artwork and section symbols
+
+Reviewed 17 October 2026. The public hero, the default social card and the app icon are the reviewed cut-paper screenprint set: warm ivory paper, graphite ink and one short burnt-orange paper chain beside a green paper kangaroo. The square master renders in a reserved 1:1 box with a hairline border and a maximum width of (560px); the social card is 1200 × 630. Keep the illustration separate from published content, and keep the hand-authored chain-ring `mark.svg` for favicon and mount identity. Exact files, request identity and removals are in `public/brand/linkarooie-art-v3.PROVENANCE.txt`.
+
+Each profile section title leads with the fixed symbol of the group it names (Featured star, Music, Games, Code, Writing, Connect link), in the theme accent at (22px), reduced to (19px) on phones. Symbols are decorative: the group name stays the accessible text. Both the link and milestone pickers offer the same eight symbols; older saves that used the heart keep rendering it, so no stored style is invalidated.
+
+Discovery stays quiet unless it can help. Search and its status render only when the profile publishes more than one card, the status stays silent until someone types or filters and then reads “N of M items shown”, and the jump nav is omitted when there is nothing to jump to. On phones the jump nav is one horizontally scrolling row with visible 44px targets, and the hero is compressed — banner, avatar, title and bio — so the first featured pick arrives sooner. Desktop keeps the two-column hero and the wrapped jump nav.
 
 ## Components
 

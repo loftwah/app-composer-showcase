@@ -10,11 +10,11 @@ Owner entry is `/owner`. This instance sets `OWNER_STUDIO_URL` to its existing C
 
 ## Public project standard
 
-Reviewed 13 October 2026. The app supplies saved reader dark/light themes, native app navigation with Ctrl/Cmd+K and ordinary links, visible keyboard focus, phone layouts, favicon/touch icon and page-specific social metadata. Original generated App Composer artwork is retained with its prompt; functional icons remain vectors. These features do not widen signup, owner access or disclosure permissions.
+Reviewed 13 October 2026. The app supplies saved reader dark/light themes, native app navigation with Ctrl/Cmd+K and ordinary links, visible keyboard focus, phone layouts, favicon/touch icon and page-specific social metadata. Original cut-paper App Composer artwork is retained with its recorded request and file inventory (`public/brand/linkarooie-art-v3.PROVENANCE.txt`); functional icons remain vectors. These features do not widen signup, owner access or disclosure permissions.
 
 Contributions: [Contributing](CONTRIBUTING.md), [Code of Conduct](CODE_OF_CONDUCT.md), [Security](SECURITY.md), [Accessibility](ACCESSIBILITY.md). Physical-device, screen-reader and full platform sharing acceptance remain distinct from browser checks.
 
-Public collections include search, photo/link filters, destination previews and a clear app explanation. Navigation uses original app thumbnails and retains Composer's theme/links when mounted; standalone themes remain app-owned. The invited studio and current-source visibility checks are unchanged. Review: 14 October 2026.
+Public collections include search, photo/link filters, destination previews and a clear app explanation. Reviewed 17 October 2026: search and its status appear only when more than one item is published, the count stays silent until someone types or filters, and the jump nav disappears when there is nothing to jump to, so no control implies content. Navigation uses original app thumbnails and retains Composer's theme/links when mounted; standalone themes remain app-owned. The invited studio and current-source visibility checks are unchanged.
 
 ## Health and optional usage
 
@@ -26,7 +26,7 @@ The launch operator enables its own instances through Wrangler secrets; do not c
 
 Add `?vitals=1` to the public page, then open “Page performance” for local LCP/INP/CLS measurements. Values apply to this load only; unsupported metrics say unavailable. The self-hosted standard `web-vitals` 6.2.3 bundle and Apache licence/provenance are retained. No values, element attribution or page data are uploaded or persisted. Developer console links stay public and do not print app contents.
 
-Original editorial presentation, reviewed 14 October 2026: app-specific illustrated hero and sharing artwork, responsive 600/1200px WebP sources, reserved image dimensions, clear collection/story sections and native browse/contribute actions. Illustration is labelled separately from published contributions. Mounted social URLs resolve inside the app mount. Owner titles, introductions, layouts, moderation, data and configuration contracts are preserved. Asset provenance and optimisation are recorded beside each derivative.
+Original editorial presentation, reviewed 14 October 2026: app-specific illustrated hero and sharing artwork, responsive 480/960px WebP sources, reserved image dimensions, clear collection/story sections and native browse/contribute actions. Illustration is labelled separately from published contributions. Mounted social URLs resolve inside the app mount. Owner titles, introductions, layouts, moderation, data and configuration contracts are preserved. Asset provenance and optimisation are recorded beside each derivative.
 
 The protected collection studio edits existing authored titles, descriptions and HTTPS destinations, previews unsaved cards without network fetching, and saves with explicit visibility. Source-backed photo content stays owned by its provider. Reordering waits for a successful server response before changing the visible order; failures leave the current order intact.
 
@@ -88,8 +88,8 @@ Native Composer parity: manifest `profileSettings` version1 advertises the fixed
 
 ## Creator profiles
 
-The optional `profile` layout uses an owner-selected portrait, banner and social preview, eight featured picks and grouped Music/Games/Projects/Writing/Connect discovery across up to64 existing cards. Other layouts and source-controlled photo eligibility remain available. Configure image URLs and X in the owner studio or the reviewed Composer settings; images require public HTTPS addresses. No personal creator is the default. See [asset provenance and settings-file scope](docs/brand/provenance.md). Exact release and current reference curation evidence belongs in Composer issue11.
+The optional `profile` layout uses an owner-selected portrait, banner and social preview, eight featured picks and grouped Music/Games/Projects/Writing/Connect discovery across up to 64 existing cards. Reviewed 17 October 2026: every section title leads with the fixed symbol of the group it names, the symbol set now includes `game` and `star` (existing `heart` styles keep rendering), and the phone hero is compressed with a single scrolling jump row so featured picks arrive sooner. Other layouts and source-controlled photo eligibility remain available. Configure image URLs and X in the owner studio or the reviewed Composer settings; images require public HTTPS addresses. No personal creator is the default. See [asset provenance and settings-file scope](docs/brand/provenance.md). Exact release and current reference curation evidence belongs in Composer issue11.
 
 The shared header keeps theme switching as a quiet current-mode sun/moon icon. Preserve the stable Dark theme accessible toggle name, pressed state, keyboard focus, 44px target and existing saved-preference key. Keep the secondary control class so light-theme primary-button rules cannot override its foreground.
 
-Featured profile picks are shortcuts, not a separate category: each eligible card also appears under its assigned group. Search counts unique card IDs across the repeated views, so a featured game still belongs under Games without inflating the item count.
+Featured profile picks are shortcuts, not a separate category: each eligible card also appears under its assigned group. Search counts unique card IDs across the repeated views, so a featured game still belongs under Games without inflating the item count, and the count itself stays quiet until a visitor filters.

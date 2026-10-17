@@ -1,1 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#f4f0e8"/><path d="M10 12h32v32H10z" fill="none" stroke="#252923" stroke-width="6"/><path d="M24 26h30v28H24z" fill="#f4f0e8" stroke="#d95022" stroke-width="6"/><path d="M24 26v18h18" stroke="#252923" stroke-width="6" fill="none"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Linkarooie">
+  <rect width="64" height="64" rx="14" fill="#f4f0e8"/>
+  <g transform="rotate(-45 32 32)" fill="none" stroke="#252923" stroke-width="11">
+    <rect x="10" y="25.5" width="22" height="13" rx="6.5"/>
+    <rect x="32" y="25.5" width="22" height="13" rx="6.5"/>
+  </g>
+  <g transform="rotate(-45 32 32)" fill="none" stroke="#a5fd0e" stroke-width="5">
+    <rect x="10" y="25.5" width="22" height="13" rx="6.5"/>
+    <rect x="32" y="25.5" width="22" height="13" rx="6.5"/>
+  </g>
+</svg>

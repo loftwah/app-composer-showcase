@@ -2,7 +2,7 @@
   "contract": 1,
   "id": "showcase",
   "name": "Linkarooie",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "repository": "https://github.com/loftwah/app-composer-showcase",
   "runtime": "cloudflare-worker",
   "entry": "src/worker.ts",
@@ -22,7 +22,7 @@
     },
     "intro": {
       "type": "string",
-      "default": "A few things we think you should see.",
+      "default": "A small collection, chosen with care. Feature a moment from the guestbook or add something of your own.",
       "maxLength": 240
     },
     "theme": {
@@ -111,7 +111,9 @@
       "code",
       "music",
       "video",
-      "heart"
+      "game",
+      "heart",
+      "star"
     ]
   },
   "achievementCollection": {
