@@ -57,8 +57,8 @@ test("mounted navigation and saved theme stay in the composition before painting
 // A composed route must share its own art rather than another host's root asset.
 test("social image resolves inside the actual app mount",async()=>{
  const body=await html("Fixture","","/showcase","showcase","midnight","Description","https://composer.loftwah.com","/").text();
- assert.match(body,/property="og:image" content="https:\/\/composer.loftwah.com\/showcase\/brand\/linkarooie-share-v4.jpg"/);
- assert.match(body,/name="twitter:image" content="https:\/\/composer.loftwah.com\/showcase\/brand\/linkarooie-share-v4.jpg"/);
+ assert.match(body,/property="og:image" content="https:\/\/composer.loftwah.com\/showcase\/brand\/linkarooie-share-20261018.jpg"/);
+ assert.match(body,/name="twitter:image" content="https:\/\/composer.loftwah.com\/showcase\/brand\/linkarooie-share-20261018.jpg"/);
  assert.match(body,/og:image:width" content="1200"/);
 });
 
@@ -67,7 +67,7 @@ test("social image resolves inside the actual app mount",async()=>{
 test("share image metadata describes the built-in card but not a configured image",async()=>{
  const origin="https://composer.loftwah.com",base="/showcase";
  const builtIn=await html("Fixture","",base,"showcase","midnight","Description",origin,"/").text();
- assert.match(builtIn,/property="og:image" content="https:\/\/composer.loftwah.com\/showcase\/brand\/linkarooie-share-v4.jpg"/);
+ assert.match(builtIn,/property="og:image" content="https:\/\/composer.loftwah.com\/showcase\/brand\/linkarooie-share-20261018.jpg"/);
  assert.match(builtIn,/property="og:image:width" content="1200"/);
  assert.match(builtIn,/property="og:image:height" content="630"/);
  assert.match(builtIn,/property="og:image:type" content="image\/jpeg"/);
@@ -80,7 +80,7 @@ test("share image metadata describes the built-in card but not a configured imag
  assert.doesNotMatch(configured,/og:image:type/);
  assert.match(configuredResponse.headers.get("content-security-policy"),/img-src 'self'[^;]*https:\/\/images\.example\.test/);
  const rejected=await html("Fixture","",base,"showcase","midnight","Description",origin,"/",origin,{shareImage:"http://insecure.test/card.png"}).text();
- assert.match(rejected,/property="og:image" content="https:\/\/composer.loftwah.com\/showcase\/brand\/linkarooie-share-v4.jpg"/);
+ assert.match(rejected,/property="og:image" content="https:\/\/composer.loftwah.com\/showcase\/brand\/linkarooie-share-20261018.jpg"/);
  assert.match(rejected,/property="og:image:type" content="image\/jpeg"/);
 });
 
