@@ -118,7 +118,8 @@ test('ordinary settings save releases pending state after cancelled navigation a
   const submitted={...config,title:'  Normalized name  '},saved={...config,title:'Normalized name',ownerExtension:'FICTIONAL PRIVATE EXTENSION'};
   const form={dataset,querySelector:selector=>selector==='button'?button:message,addEventListener(name,handler){if(name==='submit')submit=handler;},dispatchEvent(event){events.push(event);}};
   const document={querySelector:selector=>selector==='#config'?form:selector==='main [role=status]'?message:null};
-  const source=client('','showcase_session').replace(/^<script>/,'').replace(/<\/script>$/,'');
+  assert.match(client('','showcase_session'),/type="module"[^>]+src="\/brand\/owner\.js"/);
+  const source=readFileSync(new URL('../public/brand/owner.js',import.meta.url),'utf8').replace(/export \{\};\s*$/,'');
   runInNewContext(source,{document,FormData:class{constructor(){return Object.entries(submitted);}},CustomEvent:class{constructor(type,options){this.type=type;this.detail=options.detail;}},location:{reload(){assert.equal(dataset.saving,undefined);assert.equal(button.disabled,false);reloads++;/* Model a cancelled navigation, not actual browser acceptance. */}},fetch:()=>new Promise(done=>{respond=done;})});
   const pending=submit({preventDefault(){},currentTarget:form});assert.equal(dataset.saving,'true');assert.equal(button.disabled,true);
   respond({ok:!fails,json:async()=>fails?{error:'Fictional uncertain result'}:{ok:true,config:saved}});await pending;

@@ -1,12 +1,18 @@
 # Linkarooie
 
-An original, independently deployable showcase mini-app. MIT. Reviewed 13 October 2026.
+Linkarooie publishes a small creator profile and curated collection: write links, group and pin picks, add tags or achievements, and feature approved Guestbook moments. It owns its profile and authored collection; Guestbook retains ownership and approval of source photos. MIT.
 
-`pnpm install; pnpm check; pnpm dev`. Deployment: provision isolated D1, apply `migrations/0001.sql`, set `OWNER_API_TOKEN` with Wrangler secret input, then `pnpm deploy`. No GitHub Actions. Secrets never belong in source.
+[Development commands and checked source ownership](ENGINEERING.md).
 
-Versioned contract: `app.manifest.json`. Generic provider API: `/api/items` and `/api/items/:id`, contract 1; only currently public approved items are returned. Media and item queries send no-store, so source revocation applies on the next controlled request. A downloaded copy cannot be recalled.
+`pnpm install --frozen-lockfile; pnpm check; pnpm dev`. Deployment: provision isolated D1, apply `migrations/0001.sql`, set `OWNER_API_TOKEN` with Wrangler secret input, then `pnpm deploy`. No GitHub Actions. Secrets never belong in source.
 
-Owner entry is `/owner`. This instance sets `OWNER_STUDIO_URL` to its existing Cloudflare-protected Composer editor, selecting this app. The redirect creates no app session and grants no API permission. Independent installations omit that optional variable and retain the local runtime-credential studio. Public registration is not added. Public browsing works without Composer. Uploads are invitation/owner-only; no anonymous multi-tenant promise. Composition mounts this service under its manifest route. Data remains with the app, never inside Composer.
+Versioned app contract: `app.manifest.json`. Linkarooie **consumes** Guestbook’s contract-1 `/api/items` and `/api/items/:id` provider API. It checks current public approval each time a linked moment is resolved. Here / there owns the media and moderation; this repository owns the curated cards and profile, and grants no provider moderation rights. A downloaded public copy cannot be recalled.
+
+Owner entry is `/owner`. This instance sets `OWNER_STUDIO_URL` to its existing Cloudflare-protected Composer editor, selecting this app. The redirect creates no app session and grants no API permission. Independent installations omit that optional variable and retain the local runtime-credential studio. Public registration is not added. Public browsing works without Composer. The studio is owner-only; photos are uploaded and moderated in Guestbook. No anonymous multi-tenant promise is added. Composition mounts this service under its manifest route. Data remains with the app, never inside Composer.
+
+![Linkarooie public profile captured in a real browser with fictional fixtures](docs/images/public-profile.png)
+
+This is the actual public app with a fictional local profile and collection.
 
 ## Public project standard
 

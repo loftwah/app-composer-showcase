@@ -1,0 +1,148 @@
+{
+  "format": "linkarooie.artwork",
+  "version": 1,
+  "date": "2026-10-18",
+  "acceptance": "MP qualified acceptance: character, pose, colours and conservative copy at 8/10; final delivery is separately verified.",
+  "master": "public/brand/linkarooie-curator-20261018-master.png",
+  "generation": {
+    "tool": "builtin image_gen",
+    "image": "exec-3ce66dbd-eb58-4fdd-b2b0-d602c04ff86d.png",
+    "direction": "Lime workshop curator selecting an orange cassette; purple handheld and cream notebook; rejected transmission tags in a bin. Existing accepted character stays locked. No lettering generated."
+  },
+  "crops": {
+    "icon": [
+      1000,
+      0,
+      400,
+      400
+    ],
+    "hero": [
+      780,
+      0,
+      908,
+      908
+    ]
+  },
+  "files": [
+    {
+      "path": "public/brand/apps/linkarooie-small-20261018.webp",
+      "bytes": 3596,
+      "sha256": "b9b0cad6ce37c35a8a43899b30834bc001ae1a9c7acff4997a16467cd442d033"
+    },
+    {
+      "path": "public/brand/composer-mark-20261018.svg",
+      "bytes": 340,
+      "sha256": "06514c274bf67db83d747ce717b60a89af01d7f64b060b675dd07e9f022d3ab4"
+    },
+    {
+      "path": "public/brand/linkarooie-art-20261018-480.webp",
+      "bytes": 60352,
+      "sha256": "aea0419d46b5a9a345224abc9f5fc63f2c90bedb44a22737e60771738c408fed"
+    },
+    {
+      "path": "public/brand/linkarooie-art-20261018-960.webp",
+      "bytes": 139442,
+      "sha256": "d3432d6bbca294d06597bb252f5cbc185447b859eaca5db6ba9de37a37ec7b40"
+    },
+    {
+      "path": "public/brand/linkarooie-curator-20261018-master.png",
+      "bytes": 1855391,
+      "sha256": "0928056f6e8a81bd4ea2e10d4424cc449c021a4f8ed1d471810c1878b4e4b1bc"
+    },
+    {
+      "path": "public/brand/linkarooie-icon-20261018-16.png",
+      "bytes": 807,
+      "sha256": "6d27a21a360e7f07df0acc9b2f884632e86466d95d3bce12fd2dfd1fb0a24ae9"
+    },
+    {
+      "path": "public/brand/linkarooie-icon-20261018-180.png",
+      "bytes": 49595,
+      "sha256": "519dbf714dc5f8c20d5145455325facc3aa8ff53b311a10fc9e1ac984ba14151"
+    },
+    {
+      "path": "public/brand/linkarooie-icon-20261018-192.png",
+      "bytes": 55289,
+      "sha256": "f081f3a229715873ca7877922355b3af03c37bcd0df1dd69380613186f45756c"
+    },
+    {
+      "path": "public/brand/linkarooie-icon-20261018-32.png",
+      "bytes": 2523,
+      "sha256": "4d715ad9118c72d3cf8630d5651aa994863fc12896f138168915163f61206bf2"
+    },
+    {
+      "path": "public/brand/linkarooie-icon-20261018-48.png",
+      "bytes": 5003,
+      "sha256": "147771bbe8f72e7f17aed7cc4b9c39749a0ed157e3e9e35ce1d08670e2078f5e"
+    },
+    {
+      "path": "public/brand/linkarooie-icon-20261018-512.png",
+      "bytes": 278063,
+      "sha256": "8a12d856bee2ee01b93d1774427d11139b18bf57a35e0319ca00468108910105"
+    },
+    {
+      "path": "public/brand/linkarooie-icon-20261018-96.png",
+      "bytes": 16525,
+      "sha256": "323218614df365f3037395802cf0571f236e8bf62371083af333cac2de6177ca"
+    },
+    {
+      "path": "public/brand/linkarooie-share-20261018-600.webp",
+      "bytes": 43062,
+      "sha256": "410aedcdcbc83647e32cee7a899f7d29733dab966c89d20ad7e2c96646e6bde9"
+    },
+    {
+      "path": "public/brand/linkarooie-share-20261018.jpg",
+      "bytes": 163904,
+      "sha256": "c4392aeffbb24e7cff5afdbff5b99953f463093d509b2f2da467ee3e3c53dacc"
+    },
+    {
+      "path": "public/brand/linkarooie-share-20261018.webp",
+      "bytes": 118330,
+      "sha256": "7f9b3f942dd71937ed10c04ab036db43ca0b17b0c3abe095d36467a1c7cd5df0"
+    },
+    {
+      "path": "public/brand/space-latin-20261018.woff2",
+      "bytes": 49204,
+      "sha256": "61d00a1c57fcd7d4826c7a69cd85b61d15d133d5471d3c9c4731d70193d9f71f"
+    },
+    {
+      "path": "public/brand/apps/herethere-small-20261018.webp",
+      "bytes": 2896,
+      "sha256": "4fec95fe6cfccd8b901c8f424599f4cb57aea6ad2eb11f56e79b95a57260b568"
+    },
+    {
+      "path": "public/brand/apps/linkcheck-small-20261018.webp",
+      "bytes": 4238,
+      "sha256": "be9d5e7b8f24ec6d8b8d073075e3208dbd3e68afc78ecc00c9184882f98b0326"
+    },
+    {
+      "path": "public/brand/apps/hello-small-20261018.webp",
+      "bytes": 1826,
+      "sha256": "c2aef7354c04affc6060d095912307794cc5436acff8a45d26c913b989222db1"
+    },
+    {
+      "path": "public/brand/apps/carryforward-small-20261018.webp",
+      "bytes": 2364,
+      "sha256": "d684c61b50c8f1c44eefc376c232fb9192c40d4b80365eb971a3ad1684add88c"
+    },
+    {
+      "path": "public/brand/composer-icon-20261018-96.png",
+      "bytes": 15943,
+      "sha256": "b20dd22c890237c48a1e47e81fef1e715b5d77968bdeeb624ba0eceb1ae47b66"
+    },
+    {
+      "path": "public/brand/creators/loftwah-share-20261018.jpg",
+      "bytes": 163425,
+      "sha256": "5cef4e4d65784585c90d1e77a18a6c6ec98642557259c38bcb8bbad0b5c0a7d1"
+    },
+    {
+      "path": "public/brand/creators/loftwah-share-20261018.webp",
+      "bytes": 117668,
+      "sha256": "6f873bbab0cf99e4388d87cd8356be1931aeb096d6c173c61562722f9bedb323"
+    },
+    {
+      "path": "public/brand/creators/loftwah-share-20261018-600.webp",
+      "bytes": 40328,
+      "sha256": "10571a45791848794ce8a2e9b37a077194998d255278a8c1ce3e19742da3261c"
+    }
+  ]
+}

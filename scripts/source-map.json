@@ -1,0 +1,19 @@
+{
+  "publisher.mjs": "src/publisher.mjs",
+  "publisher.d.mts": "src/publisher.d.mts",
+  "navigation.js": "public/brand/navigation.js",
+  "creator-profile.js": "public/brand/creator-profile.js",
+  "profile-tags.js": "public/brand/profile-tags.js",
+  "collection-studio.js": "public/brand/collection-studio.js",
+  "achievements-studio.js": "public/brand/achievements-studio.js",
+  "tags-studio.js": "public/brand/tags-studio.js",
+  "profile-settings-studio.js": "public/brand/profile-settings-studio.js",
+  "achievement-date.mjs": "public/brand/achievement-date.mjs",
+  "achievement-date.d.mts": "public/brand/achievement-date.d.mts",
+  "profile-settings-fields.mjs": "public/brand/profile-settings-fields.mjs",
+  "profile-settings-fields.d.mts": "public/brand/profile-settings-fields.d.mts",
+  "profile-tag-fields.mjs": "public/brand/profile-tag-fields.mjs",
+  "profile-tag-fields.d.mts": "public/brand/profile-tag-fields.d.mts",
+  "studio-dom.js": "public/brand/studio-dom.js",
+  "owner.js": "public/brand/owner.js"
+}
