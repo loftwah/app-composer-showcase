@@ -140,7 +140,7 @@ function fixture() {
   };
   globalThis.BUILD_SHA = "f".repeat(40);
   globalThis.MANIFEST = { contract: 1, id: "showcase" };
-  const request = (path, body, auth = true, writeOrigin = origin) =>
+  const request = (path, body, auth = true, writeOrigin = origin, proof = {}) =>
     worker.fetch(
       new Request(origin + path, {
         method: body === undefined ? "GET" : "POST",
@@ -148,6 +148,10 @@ function fixture() {
           ...(auth ? { Authorization: "Bearer fictional-owner" } : {}),
           Origin: writeOrigin,
           "Content-Type": "application/json",
+          "X-Composer-Source": "f".repeat(40),
+          "X-Composer-Target":
+            origin + (path.startsWith("/showcase/") ? "/showcase" : ""),
+          ...proof,
         },
         ...(body === undefined ? {} : { body: JSON.stringify(body) }),
       }),
@@ -593,6 +597,76 @@ test("concurrent collection requests share one source key and never overwrite an
       f.sqlite.prepare("SELECT COUNT(*) AS n FROM cards").get().n,
       1,
     );
+  } finally {
+    f.close();
+  }
+});
+
+test("scoped writes bind the running source and actual mounted/standalone target; legacy writes remain compatible", async () => {
+  const f = fixture();
+  try {
+    const body = { item: "same-item", status: "published", source: a };
+    for (const path of ["/api/cards", "/showcase/api/cards"]) {
+      const target =
+        origin + (path.startsWith("/showcase/") ? "/showcase" : "");
+      for (const proof of [
+        { "X-Composer-Source": "" },
+        { "X-Composer-Source": "e".repeat(40) },
+        { "X-Composer-Target": "" },
+        { "X-Composer-Target": target + "/other" },
+        { "X-Composer-Target": "https://other.example.test" },
+        { "X-Composer-Target": target + "?target=trusted" },
+      ]) {
+        const response = await f.request(path, body, true, origin, proof);
+        assert.equal(response.status, 409);
+        assert.equal((await response.json()).outcome, "refused");
+      }
+      assert.equal(
+        f.calls.length,
+        0,
+        "identity refusal happens before provider dispatch",
+      );
+    }
+    const verified = await f.request("/build.json");
+    const oldSource = (await verified.json()).revision;
+    globalThis.BUILD_SHA = "e".repeat(40);
+    assert.equal(
+      (
+        await f.request("/api/cards", body, true, origin, {
+          "X-Composer-Source": oldSource,
+        })
+      ).status,
+      409,
+    );
+    assert.equal(
+      f.calls.length,
+      0,
+      "redeploy after verification refuses the old source",
+    );
+    assert.equal(
+      (
+        await f.request("/showcase/api/cards", body, true, origin, {
+          "X-Composer-Source": "e".repeat(40),
+        })
+      ).status,
+      201,
+    );
+    assert.equal(
+      (
+        await f.request("/api/cards", body, true, origin, {
+          "X-Composer-Source": "e".repeat(40),
+        })
+      ).status,
+      200,
+    );
+    const legacy = await f.request(
+      "/api/cards",
+      { item: "legacy-item", status: "published" },
+      true,
+      origin,
+      { "X-Composer-Source": "", "X-Composer-Target": "" },
+    );
+    assert.equal(legacy.status, 201);
   } finally {
     f.close();
   }

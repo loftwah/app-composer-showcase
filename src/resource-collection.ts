@@ -11,6 +11,31 @@ interface SavedCard {
 }
 type Environment = ProviderEnvironment & { DB: D1Database };
 
+// Expected identity is derived from this running Worker, never forwarded input.
+// The bridge must still be connected to the source it verified before dispatch.
+export function collectionWriteProof(
+  request: Request,
+  base: string,
+  revision: string,
+  source: ResourceSource,
+): Response | null {
+  if (
+    request.headers.get("X-Composer-Source") !== revision ||
+    request.headers.get("X-Composer-Target") !==
+      new URL(request.url).origin + base
+  )
+    return json(
+      {
+        source,
+        outcome: "refused",
+        message:
+          "The selected collection source or deployment target changed. Refresh and compare before collecting.",
+      },
+      409,
+    );
+  return null;
+}
+
 // A replay retains the original card ID. This source key cannot create two
 // cards even when a committed INSERT acknowledgement is lost or concurrent.
 export async function collectResourceItem(

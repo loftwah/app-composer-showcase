@@ -80,7 +80,18 @@ if (cards) {
     async function request(path, data) {
         const response = await fetch(base + path, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                ...(path === "/api/cards" &&
+                    typeof data === "object" &&
+                    data !== null &&
+                    "source" in data
+                    ? {
+                        "X-Composer-Source": cards.dataset.source ?? "",
+                        "X-Composer-Target": cards.dataset.target ?? "",
+                    }
+                    : {}),
+            },
             body: JSON.stringify(data),
         });
         const value = record(await response.json());
