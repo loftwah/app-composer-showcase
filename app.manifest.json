@@ -2,7 +2,7 @@
   "contract": 1,
   "id": "showcase",
   "name": "Linkarooie",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "repository": "https://github.com/loftwah/app-composer-showcase",
   "runtime": "cloudflare-worker",
   "entry": "src/worker.ts",
@@ -150,5 +150,14 @@
       "Writing",
       "Connect"
     ]
+  },
+  "providerSources": {
+    "version": 1,
+    "kinds": [
+      "guestbook.resource"
+    ],
+    "provider": "guestbook",
+    "selection": "explicit-resource-and-activated-configuration",
+    "eligibility": "checked-at-each-render-and-export"
   }
 }

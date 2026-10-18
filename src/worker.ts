@@ -1,3 +1,13 @@
+import { collectResourceItem, collectionWriteProof } from "./resource-collection.ts";
+import {
+  providerItems,
+  providerItem,
+  resolveCard as resolve,
+  exportCard,
+  sourceSelection,
+  querySource,
+  SourceSelectionError,
+} from "./item-provider.ts";
 import {creatorProfile} from './creator-profile.ts';
 import {profileConfiguration,profileFields,iconNames,decoration,presentation,decorateCards,icon,groupNames,cardLimit} from './profile.ts';
 import {achievementStudio,publicAchievements} from './achievement-view.ts';
@@ -43,37 +53,6 @@ const defaults = {
   layout: "grid",
   ...Object.fromEntries(profileFields.map(field=>[field.key,field.default])),
 };
-async function provider(env: Env, path: string) {
-  const origin = new URL(env.PROVIDER_ORIGIN);
-  if (origin.protocol !== "https:") throw new Error("Provider must use HTTPS");
-  const res = await env.ITEM_PROVIDER.fetch(
-    new Request(origin.origin + (env.PROVIDER_BASE ?? "") + path),
-    { signal: AbortSignal.timeout(4000) },
-  );
-  if (!res.ok) return null;
-  const body: any = await res.json();
-  if (body.contract !== 1 || body.provider !== env.PROVIDER_ID) return null;
-  return body;
-}
-async function resolve(env: Env, c: any) {
-  if (!c.provider) return { ...c, image: null };
-  const p = await provider(env, "/api/items/" + encodeURIComponent(c.item_id));
-  if (!p || p.visibility !== "public" || p.id !== c.item_id) return null;
-  const image = new URL(p.image),
-    url = new URL(p.url);
-  if (
-    image.origin !== new URL(env.PROVIDER_ORIGIN).origin ||
-    url.origin !== image.origin
-  )
-    return null;
-  return {
-    ...c,
-    title: p.title,
-    description: p.description,
-    url: url.href,
-    image: image.href,
-  };
-}
 async function styles(env:Env){
  const row=await env.DB.prepare("SELECT value FROM settings WHERE id='presentation'").first<{value:string}>();
  return row?presentation(JSON.parse(row.value)):{};
@@ -128,11 +107,11 @@ const app = {
         const cards = await Promise.all(
           results.map((c) => resolve(env, c).catch(() => null)),
         );
-        return json({ contract: 1, cards: decorateCards(cards.filter(Boolean),await styles(env)) });
+        return json({ contract: 1, cards: decorateCards(cards.filter(card=>card!==null),await styles(env)) });
       }
       if (path === "/api/provider" && req.method === "GET") {
         if (!owner) return error("Owner sign-in required", 401);
-        const p = await provider(env, "/api/items");
+        const p = await providerItems(env, querySource(u.searchParams)).catch(() => null);
         return p
           ? json(p)
           : error("Source unavailable; no items can be featured", 503);
@@ -148,6 +127,17 @@ const app = {
         )
           return error("Write origin is not authorised", 403);
         const b = await readJSON(req,path==='/api/cards'?32768:8192);
+        if (["resource", "configuration", "source_resource", "source_configuration"].some(key => Object.hasOwn(b,key)))
+          return error("Use an explicit supported source selection.");
+        const selectedSource = Object.hasOwn(b, "source")
+          ? sourceSelection(b.source)
+          : undefined;
+        if (selectedSource && (path !== "/api/cards" || b.id || typeof b.item !== "string"))
+          return error("A source reference belongs to a new contribution card only.");
+        if (selectedSource) {
+          const refused = collectionWriteProof(req, base, BUILD_SHA, selectedSource);
+          if (refused) return refused;
+        }
         if(path==='/api/presentation'){
           if(typeof b.id!=='string'||!/^[a-zA-Z0-9-]{1,64}$/.test(b.id))return error('Choose a current card.');
           const current=await env.DB.prepare("SELECT value FROM settings WHERE id='presentation'").first<{value:string}>();
@@ -233,6 +223,8 @@ const app = {
             .run();
           return json({ ok: true });
         }
+        if (selectedSource)
+          return collectResourceItem(env, String(b.item), selectedSource, status);
         const count = await env.DB.prepare(
           "SELECT COUNT(*) as n FROM cards",
         ).first<{ n: number }>();
@@ -248,10 +240,7 @@ const app = {
           providerID: string | null = null;
         if (b.item) {
           item = text(b.item, 64);
-          const p = await provider(
-            env,
-            "/api/items/" + encodeURIComponent(item),
-          );
+          const p = await providerItem(env, item).catch(() => null);
           if (!p || p.visibility !== "public")
             return error(
               "Choose a currently approved public contribution",
@@ -292,7 +281,7 @@ const app = {
           dataVersion: 1,
           config: await settings(env, defaults),
           presentationVersion:1,
-          cards: decorateCards((await env.DB.prepare("SELECT * FROM cards ORDER BY position,id").all<{id:string}>()).results,await styles(env),false),
+          cards: decorateCards((await Promise.all((await env.DB.prepare("SELECT * FROM cards ORDER BY position,id").all()).results.map(card => exportCard(env,card)))).filter(card=>card!==null),await styles(env),false),
           ...achievements,
           ...tags,
         });
@@ -317,10 +306,15 @@ const app = {
         const savedStyles=await styles(env);
         const achievements=await readAchievements(env.DB).then(saved=>saved.collection).catch(()=>null);
         const tags=await readTags(env.DB).then(saved=>saved.collection).catch(()=>null);
-        const available = await provider(env, "/api/items").catch(() => null);
+        const selectedSource = querySource(u.searchParams);
+        const available = await providerItems(env, selectedSource).catch(() => null);
+        const currentCards = await Promise.all(results.map(async (card) => {
+          if (card.source_resource == null && card.source_configuration == null) return card;
+          return await resolve(env,card).catch(() => null) ?? {...card,title:"Source unavailable",description:"",url:null};
+        }));
         return html(
           String(config.title),
-          `<h1>The collection studio.</h1><p>Choose, order and publish up to 64 cards. Featured contributions are checked against their source on every public request.</p><div class="row"><button id="logout" class="secondary">Sign out</button><a href="${base}/api/export">Export your collection</a></div><p role="status" class="message" aria-live="polite"></p>${configForm(config)}${profilePortabilityStudio(base)}<h2>Feature an approved moment</h2><form id="feature"><label>Source contribution<select name="item" required><option value="">Choose a moment</option>${(available?.items ?? []).map((p: any) => `<option value="${escape(p.id)}">${escape(p.title)}</option>`).join("")}</select></label><button ${available ? "" : "disabled"}>Feature publicly</button></form>${available ? "" : "<p>The source is unavailable. Existing private or unavailable items stay hidden.</p>"}<h2>Add your own card</h2><form id="manual"><label>Title<input name="title" maxlength="100" required></label><label>Description<textarea name="description" maxlength="240"></textarea></label><label>Destination<input name="url" type="url" placeholder="https://" required></label><button>Add a draft</button></form><h2>Arrange the collection</h2><div id="cards" data-base="${base}">${results.map((card: any) => {const c={...card,...(savedStyles[card.id]??{pinned:false,icon:'link'})};return `<article data-card="${escape(c.id)}"><h3>${escape(c.title)}</h3><p>${escape(c.status)} · ${c.provider ? "Linked source contribution · content follows its source" : "Your authored card"}</p>${c.provider ? "" : `<details class="card-editor"><summary>Edit this link</summary><form data-edit-card data-link-snapshot="${escape(JSON.stringify({title:c.title,description:c.description,url:c.url,status:c.status}))}"><label>Card title<input name="title" maxlength="100" value="${escape(c.title)}" required></label><label>Card description<textarea name="description" maxlength="240">${escape(c.description)}</textarea></label><label>Card destination<input name="url" type="url" pattern="https://.*" value="${escape(c.url)}" required></label><p class="small">Use a public HTTPS link. Saving keeps the visibility you select below.</p><label>Visibility<select name="status">${["draft","published","hidden"].map(status=>`<option value="${status}" ${c.status===status?"selected":""}>${status}</option>`).join("")}</select></label><div class="row"><button type="submit">Save card</button><button type="button" class="secondary" data-preview-card>Preview without saving</button></div><div class="card-draft-preview" data-card-preview hidden><p class="small">Preview · not saved</p><a target="_blank" rel="noopener noreferrer"><strong></strong><span></span><small></small></a></div><p data-edit-message role="status" aria-live="polite"></p></form></details>`}${styleForm(c)}<div class="row card-actions"><button type="button" data-move="up" class="secondary">Move up</button><button type="button" data-move="down" class="secondary">Move down</button><button type="button" data-status="published" class="secondary">Publish</button><button type="button" data-status="hidden" class="secondary">Hide</button><button type="button" data-delete="true" class="secondary">Remove</button></div></article>`;}).join("")}</div>${achievementStudio(achievements)}${tagStudio(tags)}${client(base, "showcase_session")}<script type="module" src="${base}/brand/collection-studio.js"></script>`,
+          `<h1>The collection studio.</h1><p>Choose, order and publish up to 64 cards. Featured contributions are checked against their source on every public request.</p><div class="row"><button id="logout" class="secondary">Sign out</button><a href="${base}/api/export">Export your collection</a></div><p role="status" class="message" aria-live="polite"></p>${configForm(config)}${profilePortabilityStudio(base)}<h2>Feature an approved moment</h2><form id="feature">${selectedSource ? `<input type="hidden" name="source" value="${escape(JSON.stringify(selectedSource))}">` : ""}<label>Source contribution<select name="item" required><option value="">Choose a moment</option>${(available?.items ?? []).map((p: any) => `<option value="${escape(p.id)}">${escape(p.title)}</option>`).join("")}</select></label><button ${available ? "" : "disabled"}>Feature publicly</button></form>${available ? "" : "<p>The source is unavailable. Existing private or unavailable items stay hidden.</p>"}<h2>Add your own card</h2><form id="manual"><label>Title<input name="title" maxlength="100" required></label><label>Description<textarea name="description" maxlength="240"></textarea></label><label>Destination<input name="url" type="url" placeholder="https://" required></label><button>Add a draft</button></form><h2>Arrange the collection</h2><div id="cards" data-base="${base}" data-source="${escape(BUILD_SHA)}" data-target="${escape(u.origin + base)}">${currentCards.map((card: any) => {const c={...card,...(savedStyles[card.id]??{pinned:false,icon:'link'})};return `<article data-card="${escape(c.id)}"><h3>${escape(c.title)}</h3><p>${escape(c.status)} · ${c.provider ? "Linked source contribution · content follows its source" : "Your authored card"}</p>${c.provider ? "" : `<details class="card-editor"><summary>Edit this link</summary><form data-edit-card data-link-snapshot="${escape(JSON.stringify({title:c.title,description:c.description,url:c.url,status:c.status}))}"><label>Card title<input name="title" maxlength="100" value="${escape(c.title)}" required></label><label>Card description<textarea name="description" maxlength="240">${escape(c.description)}</textarea></label><label>Card destination<input name="url" type="url" pattern="https://.*" value="${escape(c.url)}" required></label><p class="small">Use a public HTTPS link. Saving keeps the visibility you select below.</p><label>Visibility<select name="status">${["draft","published","hidden"].map(status=>`<option value="${status}" ${c.status===status?"selected":""}>${status}</option>`).join("")}</select></label><div class="row"><button type="submit">Save card</button><button type="button" class="secondary" data-preview-card>Preview without saving</button></div><div class="card-draft-preview" data-card-preview hidden><p class="small">Preview · not saved</p><a target="_blank" rel="noopener noreferrer"><strong></strong><span></span><small></small></a></div><p data-edit-message role="status" aria-live="polite"></p></form></details>`}${styleForm(c)}<div class="row card-actions"><button type="button" data-move="up" class="secondary">Move up</button><button type="button" data-move="down" class="secondary">Move down</button><button type="button" data-status="published" class="secondary">Publish</button><button type="button" data-status="hidden" class="secondary">Hide</button><button type="button" data-delete="true" class="secondary">Remove</button></div></article>`;}).join("")}</div>${achievementStudio(achievements)}${tagStudio(tags)}${client(base, "showcase_session")}<script type="module" src="${base}/brand/collection-studio.js"></script>`,
           base,
           "showcase",
           String(config.theme),
@@ -334,7 +328,7 @@ const app = {
         const { results } = await env.DB.prepare(
           "SELECT * FROM cards WHERE status='published' ORDER BY position,id LIMIT 64",
         ).all();
-        const resolved = decorateCards((await Promise.all(results.map((c) => resolve(env,c).catch(()=>null)))).filter(Boolean),await styles(env));
+        const resolved = decorateCards((await Promise.all(results.map((c) => resolve(env,c).catch(()=>null)))).filter(card=>card!==null),await styles(env));
         const achievementSection=await readAchievements(env.DB).then(saved=>publicAchievements(saved.collection)).catch(()=>'');
         const tagSection=await readTags(env.DB).then(saved=>publicTags(saved.collection,base)).catch(()=>'');
         const profileLinks=profileFields.filter(field=>field.key!=='handle'&&!field.image&&config[field.key]).map(field=>`<a href="${escape(config[field.key])}" rel="me noopener noreferrer">${field.label}${icon('arrow')}</a>`).join('');
@@ -359,6 +353,7 @@ const app = {
         return env.ASSETS.fetch(new Request(u.origin + path, req));
       return error("Page not found", 404);
     } catch (e) {
+      if(e instanceof SourceSelectionError)return error(e.message,400);
       if(e instanceof AchievementError||e instanceof TagError||e instanceof ProfilePortabilityError)return error(e.message,e.status);
       return error(e instanceof Error ? e.message : "Request failed", 400);
     }

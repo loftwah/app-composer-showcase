@@ -6,7 +6,7 @@ import {profileConfiguration,decoration,presentation,decorateCards,icon} from '.
 import worker from '../src/worker.ts';
 const cfg={title:'Fictional garden',intro:'Public fictional notes',theme:'midnight',layout:'compact',handle:'garden.studio',website:'https://example.test/',github:'https://github.com/example',bluesky:'',linkedin:''};
 const database=()=>{
- const sqlite=new DatabaseSync(':memory:');sqlite.exec(readFileSync(new URL('../migrations/0001.sql',import.meta.url),'utf8'));
+ const sqlite=new DatabaseSync(':memory:');sqlite.exec('PRAGMA foreign_keys=ON');sqlite.exec(readFileSync(new URL('../migrations/0001.sql',import.meta.url),'utf8'));sqlite.exec(readFileSync(new URL('../migrations/0002_scoped_sources.sql',import.meta.url),'utf8'));
  const statement=(sql,values=[])=>({bind(...next){return statement(sql,next)},async first(){return sqlite.prepare(sql).get(...values)??null},async all(){return {results:sqlite.prepare(sql).all(...values)}},async run(){sqlite.prepare(sql).run(...values);return {success:true}}});
  return {sqlite,DB:{prepare:statement,async batch(list){sqlite.exec('BEGIN');try{const results=[];for(const item of list)results.push(await item.run());sqlite.exec('COMMIT');return results;}catch(e){sqlite.exec('ROLLBACK');throw e;}}}};
 };
