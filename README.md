@@ -103,3 +103,12 @@ Featured profile picks are shortcuts, not a separate category: each eligible car
 ## Shared Apps launcher
 
 The committed `public/brand/launcher.js` and `launcher.css` follow Composer's maintained launcher contract. The controller is generated from Composer's strictly checked `src/browser/launcher.ts`; app destinations, theme keys and gallery filters stay local. Review and copy updates with Composer's explicit `pnpm ui:assets --check|--write /absolute/this-checkout`, then run this app's checks and release independently. No runtime Composer asset dependency or automatic update is added.
+
+
+### Collecting from an owned Guestbook
+
+The additive provider contract supports an explicit `{kind:"guestbook.resource",version:1,resource,configuration}` source. Authenticated `GET /api/provider?source=<JSON>` lists currently approved contributions in that exact activated configuration. `POST /api/cards` accepts the same `source` with `item` and a card visibility. Only an absent source chooses the legacy global provider; malformed or unsupported selections never fall back. Targets and credentials remain server configured.
+
+Apply the forward `0002_scoped_sources.sql` migration to the selected app D1 before deploying this code. It preserves legacy cards, IDs and settings. Scoped cards store the source identity, not copied text or media. Public views and collection exports resolve current app eligibility; hidden, deleted, unavailable or mismatched sources export their retained identity and an unavailable state without stale content. Guestbook serves and revokes its own media. Previously activated configurations keep their identity while current moderation and resource visibility still govern them.
+
+A confirmed scoped collection returns its stable card `id`, `source`, visibility and `outcome` (`applied` or `unchanged`). A committed INSERT with a lost acknowledgment is checked before reporting success. If that check also fails, a `503` unknown result retains the generated reference. The source uniqueness guard prevents concurrent or repeated requests from creating duplicate cards. The owner form keeps an uncertain selection and requires **Check saved collection** before another attempt. This is local contract/source work; native Composer integration and an exact-source release have separate evidence.

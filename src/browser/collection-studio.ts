@@ -114,9 +114,15 @@ if (cards) {
         Error(
           typeof value.error === "string"
             ? value.error
-            : "Could not save this change.",
+            : typeof value.message === "string"
+              ? value.message
+              : "Could not save this change.",
         ),
-        { status: response.status },
+        {
+          status: response.status,
+          outcome: value.outcome,
+          source: value.source,
+        },
       );
     return value;
   }
@@ -151,14 +157,110 @@ if (cards) {
   ]) {
     const entry = document.querySelector<HTMLFormElement>("#" + id)!;
     watch(entry, id === "manual" ? ["title", "description", "url"] : ["item"]);
+    const matchesSource = (value: unknown, raw: string) => {
+      try {
+        const chosen = record(JSON.parse(raw)),
+          actual = record(value);
+        return (
+          Object.keys(actual).sort().join(",") ===
+            "configuration,kind,resource,version" &&
+          ["kind", "version", "resource", "configuration"].every(
+            (key) => actual[key] === chosen[key],
+          )
+        );
+      } catch {
+        return false;
+      }
+    };
+    let interrupted: Record<string, string> | undefined;
+    const reconcile = document.createElement("button");
+    reconcile.type = "button";
+    reconcile.className = "secondary";
+    reconcile.textContent = "Check saved collection";
+    reconcile.hidden = true;
+    entry.append(reconcile);
+    const featureSubmit = entry.querySelector<HTMLButtonElement>(
+      "button[type=submit],button:not([type])",
+    );
+    reconcile.addEventListener("click", async () => {
+      if (!interrupted) return;
+      const unlock = lock();
+      if (!unlock) return;
+      try {
+        const response = await fetch(base + "/api/export", {
+          cache: "no-store",
+        });
+        if (!response.ok)
+          throw Error(
+            "The saved collection is unavailable. Keep this source selection and check again before retrying.",
+          );
+        const saved = record(await response.json());
+        if (
+          saved.dataVersion !== 1 ||
+          !Array.isArray(saved.cards) ||
+          saved.cards.length > 64 ||
+          saved.cards.some(
+            (card) =>
+              typeof record(card).id !== "string" ||
+              typeof record(card).status !== "string",
+          )
+        )
+          throw Error(
+            "The saved collection could not be verified. Keep this selection and check again.",
+          );
+        const chosen = record(JSON.parse(interrupted.source));
+        const found = saved.cards
+          .map(record)
+          .find(
+            (card) =>
+              card.provider === "guestbook" &&
+              card.item_id === interrupted!.item &&
+              card.source_resource === chosen.resource &&
+              card.source_configuration === chosen.configuration,
+          );
+        const sameSelection = field(entry, "item").value === interrupted.item;
+        interrupted = undefined;
+        reconcile.hidden = true;
+        if (featureSubmit) featureSubmit.dataset.conflicted = "false";
+        if (sameSelection) entry.reset();
+        output.textContent = found
+          ? "Saved card " +
+            String(found.id) +
+            " confirmed (" +
+            String(found.status) +
+            "). Refresh when your other edits are ready."
+          : "No matching card is in the saved collection. Your source has been checked; choose it again if you want to retry.";
+      } catch (cause) {
+        output.textContent = failure(cause).message;
+      } finally {
+        unlock();
+        if (!interrupted && featureSubmit) featureSubmit.disabled = false;
+      }
+    });
     entry.addEventListener("submit", async (event) => {
       event.preventDefault();
+      if (interrupted) return;
       const form = entry,
         data = Object.fromEntries(new FormData(form)) as Record<string, string>,
         unlock = lock();
       if (!unlock) return;
       try {
-        await request("/api/cards", { ...data, status });
+        const receipt = await request("/api/cards", {
+          ...data,
+          ...(data.source ? { source: JSON.parse(data.source) } : {}),
+          status,
+        });
+        if (
+          data.source &&
+          (typeof receipt.id !== "string" ||
+            !/^[a-zA-Z0-9-]{1,64}$/.test(receipt.id) ||
+            receipt.status !== status ||
+            !["applied", "unchanged"].includes(String(receipt.outcome)) ||
+            !matchesSource(receipt.source, data.source))
+        )
+          throw Error(
+            "The collection receipt could not be verified. Check the saved collection before retrying.",
+          );
         form.reset();
         output.textContent =
           status === "draft"
@@ -168,6 +270,27 @@ if (cards) {
       } catch (cause) {
         const error = failure(cause);
         message(error);
+        const refused =
+          typeof cause === "object" &&
+          cause !== null &&
+          "outcome" in cause &&
+          cause.outcome === "refused" &&
+          "source" in cause &&
+          data.source &&
+          matchesSource(cause.source, data.source);
+        if (
+          data.source &&
+          !refused &&
+          (error.status === undefined || error.status >= 500)
+        ) {
+          interrupted = data;
+          reconcile.hidden = false;
+          if (featureSubmit) featureSubmit.dataset.conflicted = "true";
+          output.textContent = error.message.includes("may already")
+            ? error.message
+            : error.message +
+              " This request may already have collected the card. Check the saved collection before trying again.";
+        }
       } finally {
         unlock();
       }
