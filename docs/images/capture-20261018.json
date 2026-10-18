@@ -1,0 +1,42 @@
+{
+  "capturedAt": "2026-10-18T01:11:19.744Z",
+  "kind": "actual production public UI; fictional content remains labelled by the app",
+  "records": [
+    {
+      "id": "showcase",
+      "url": "https://showcase.loftwah.com/",
+      "width": 1440,
+      "height": 960,
+      "source": "d2183515c4f603a3a6d17152d5952f740896b29d",
+      "file": "docs/images/public-profile-20261018.png",
+      "requestOverrides": false,
+      "verificationHeader": true,
+      "title": "Loftwah",
+      "heading": "Loftwah",
+      "theme": "dark",
+      "overflow": false,
+      "appsButton": true,
+      "sha256": "599232cb9043d445b477643c5c6d4e38bf51e178760fef0322574a4148b9cfc3",
+      "bytes": 766769,
+      "captureFile": "showcase-1440.png"
+    },
+    {
+      "id": "showcase",
+      "url": "https://showcase.loftwah.com/",
+      "width": 390,
+      "height": 844,
+      "source": "d2183515c4f603a3a6d17152d5952f740896b29d",
+      "file": "docs/images/public-profile-20261018-phone.png",
+      "requestOverrides": false,
+      "verificationHeader": true,
+      "title": "Loftwah",
+      "heading": "Loftwah",
+      "theme": "dark",
+      "overflow": false,
+      "appsButton": true,
+      "sha256": "8a11890403a4fe13b3ddd2fb110345423f81bce079e46c6616bf6bda71902343",
+      "bytes": 143319,
+      "captureFile": "showcase-390.png"
+    }
+  ]
+}

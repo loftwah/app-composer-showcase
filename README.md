@@ -10,9 +10,9 @@ Versioned app contract: `app.manifest.json`. Linkarooie **consumes** Guestbookâ€
 
 Owner entry is `/owner`. This instance sets `OWNER_STUDIO_URL` to its existing Cloudflare-protected Composer editor, selecting this app. The redirect creates no app session and grants no API permission. Independent installations omit that optional variable and retain the local runtime-credential studio. Public registration is not added. Public browsing works without Composer. The studio is owner-only; photos are uploaded and moderated in Guestbook. No anonymous multi-tenant promise is added. Composition mounts this service under its manifest route. Data remains with the app, never inside Composer.
 
-![Linkarooie public profile captured in a real browser with fictional fixtures](docs/images/public-profile.png)
+![Current Loftwah public screen](docs/images/public-profile-20261018.png)
 
-This is the actual public app with a fictional local profile and collection.
+Actual production public UI, captured 18 October 2026 at source `d2183515c4f603a3a6d17152d5952f740896b29d`. [Phone capture](docs/images/public-profile-20261018-phone.png) Â· [Capture provenance](docs/images/capture-20261018.json).
 
 ## Public project standard
 
