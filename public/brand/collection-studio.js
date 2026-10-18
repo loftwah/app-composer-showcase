@@ -166,6 +166,8 @@ if (cards) {
                     card.item_id === interrupted.item &&
                     card.source_resource === chosen.resource &&
                     card.source_configuration === chosen.configuration);
+                if (!found)
+                    throw Error("No matching card is in the current collection. The result remains unknown because a card may have been removed after collection. Keep this selection and check again; it has not been retried.");
                 const sameSelection = field(entry, "item").value === interrupted.item;
                 interrupted = undefined;
                 reconcile.hidden = true;
@@ -173,13 +175,12 @@ if (cards) {
                     featureSubmit.dataset.conflicted = "false";
                 if (sameSelection)
                     entry.reset();
-                output.textContent = found
-                    ? "Saved card " +
+                output.textContent =
+                    "Saved card " +
                         String(found.id) +
                         " confirmed (" +
                         String(found.status) +
-                        "). Refresh when your other edits are ready."
-                    : "No matching card is in the saved collection. Your source has been checked; choose it again if you want to retry.";
+                        "). Refresh when your other edits are ready.";
             }
             catch (cause) {
                 output.textContent = failure(cause).message;
