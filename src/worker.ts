@@ -10,7 +10,7 @@ import {
 } from "./item-provider.ts";
 import {creatorProfile} from './creator-profile.ts';
 import {contributionSection} from './contribution-view.ts';
-import {changeInvitation,invitationHref,invitationReply,invitationSetting,readGuestbookInvitation,readInvitationSetting} from './guestbook-invitation.ts';
+import {changeInvitation,InvitationConflict,invitationHref,invitationReply,invitationSetting,readGuestbookInvitation,readInvitationSetting,type InvitationSetting} from './guestbook-invitation.ts';
 import {profileConfiguration,profileFields,iconNames,decoration,presentation,decorateCards,icon,groupNames,cardLimit} from './profile.ts';
 import {achievementStudio,publicAchievements} from './achievement-view.ts';
 import {AchievementError,readAchievements,changeAchievements} from './achievements.ts';
@@ -81,16 +81,16 @@ const invitationStateText:Record<string,string>={
   unavailable:'The Guestbook cannot be reached. No send action is shown here.'
 };
 function invitationStudio(
-  setting: {source:{resource:string;configuration:number}} | null,
+  setting: InvitationSetting | null,
   invitation: {state:string} | null,
   sources: {value:string;label:string}[],
   guestbookStudio: string,
 ) {
   const state = invitation?.state ?? 'none';
   const control = setting
-    ? `<form id="invitation" data-operation="disable"><button class="secondary">Stop inviting notes from this Guestbook</button><p data-invitation-message role="status" aria-live="polite"></p></form>`
+    ? `<form id="invitation" data-operation="disable"><input type="hidden" name="expected" value="${escape(JSON.stringify(setting ?? null))}"><button class="secondary">Stop inviting notes from this Guestbook</button><p data-invitation-message role="status" aria-live="polite"></p></form>`
     : sources.length
-      ? `<form id="invitation" data-operation="enable"><label>Guestbook<select name="source" required>${sources.map(source=>`<option value="${escape(source.value)}">${escape(source.label)}</option>`).join('')}</select></label><button>Use this Guestbook</button><p data-invitation-message role="status" aria-live="polite"></p></form>`
+      ? `<form id="invitation" data-operation="enable"><input type="hidden" name="expected" value="${escape(JSON.stringify(setting ?? null))}"><label>Guestbook<select name="source" required>${sources.map(source=>`<option value="${escape(source.value)}">${escape(source.label)}</option>`).join('')}</select></label><button>Use this Guestbook</button><p data-invitation-message role="status" aria-live="polite"></p></form>`
       : `<p class="small">Feature an approved Guestbook moment first, or open this studio from Composer with a visitor book selected.</p>`;
   return `<section class="invitation-studio" aria-labelledby="invitation-title"><h2 id="invitation-title">Invite a note</h2>
     <p>Guestbook is where a visitor writes a short postcard. The owner reviews it privately before it can appear anywhere. Linkarooie links to that real form only while the Guestbook says it accepts postcards; this page never becomes a second comment feed.</p>
@@ -126,7 +126,7 @@ const app = {
         }
         let saved;
         try{saved=await changeInvitation(env.DB,body);}
-        catch(failure){return error(failure instanceof Error?failure.message:'Choose whether to invite Guestbook contributions.',400);}
+        catch(failure){return error(failure instanceof Error?failure.message:'Choose whether to invite Guestbook contributions.',failure instanceof InvitationConflict?409:400);}
         if(!saved)return invitationReply(null,null);
         const state=await contribution(env);
         return invitationReply(state.setting,state.invitation);

@@ -29,6 +29,9 @@ const asObject = (value: unknown): Record<string, unknown> | null =>
     : null;
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 const settingError = 'Check the saved Guestbook invitation.';
+export class InvitationConflict extends Error {
+  readonly status = 409;
+}
 
 export function invitationSetting(raw: unknown): InvitationSetting {
   const value = asObject(raw);
@@ -60,13 +63,37 @@ export async function changeInvitation(
   const value = asObject(command);
   if (!value || !['enable', 'disable'].includes(String(value.action)))
     throw Error('Choose whether to invite Guestbook contributions.');
+  // expected is the exact setting the owner observed: a setting object or null.
+  // The conditional write makes a stale tab a conflict, not an overwrite.
+  const expected =
+    value.expected === null
+      ? null
+      : invitationSetting(value.expected);
+  const expectedBytes = expected ? JSON.stringify(expected) : null;
   if (value.action === 'disable') {
-    if (Object.keys(value).length !== 1) throw Error(settingError);
-    await db.prepare("DELETE FROM settings WHERE id='invitation'").run();
+    if (Object.keys(value).sort().join(',') !== 'action,expected')
+      throw Error(settingError);
+    if (expected === null) {
+      // Stopping an already-stopped invitation is the same outcome, but a
+      // stale tab that observed a setting must not delete a newer one.
+      const current = await readInvitationSetting(db);
+      if (current === null) return null;
+      throw new InvitationConflict(
+        'This invitation changed in another tab. Reload before stopping it.',
+      );
+    }
+    const result = await db
+      .prepare("DELETE FROM settings WHERE id='invitation' AND value=?")
+      .bind(expectedBytes)
+      .run();
+    if (!result.success || result.meta?.changes !== 1)
+      throw new InvitationConflict(
+        'This invitation changed in another tab. Reload before stopping it.',
+      );
     return null;
   }
   if (
-    Object.keys(value).sort().join(',') !== 'action,source' ||
+    Object.keys(value).sort().join(',') !== 'action,expected,source' ||
     value.action !== 'enable'
   )
     throw Error(settingError);
@@ -74,12 +101,22 @@ export async function changeInvitation(
   const bytes = JSON.stringify(setting);
   if (new TextEncoder().encode(bytes).byteLength > 2048)
     throw Error(settingError);
-  await db
-    .prepare(
-      "INSERT INTO settings(id,value) VALUES('invitation',?) ON CONFLICT(id) DO UPDATE SET value=excluded.value",
-    )
-    .bind(bytes)
-    .run();
+  const result =
+    expected === null
+      ? await db
+          .prepare(
+            "INSERT INTO settings(id,value) VALUES('invitation',?) ON CONFLICT(id) DO NOTHING",
+          )
+          .bind(bytes)
+          .run()
+      : await db
+          .prepare("UPDATE settings SET value=? WHERE id='invitation' AND value=?")
+          .bind(bytes, expectedBytes)
+          .run();
+  if (!result.success || result.meta?.changes !== 1)
+    throw new InvitationConflict(
+      'This invitation changed in another tab. Reload before replacing it.',
+    );
   return setting;
 }
 
