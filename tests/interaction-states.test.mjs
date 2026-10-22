@@ -18,4 +18,8 @@ test("profile cards share one deliberate hover, focus and pressed contract", () 
 test("keyboard focus never changes gallery display or dimensions", () => {
   assert.doesNotMatch(style, /\.gallery a:focus-visible\{display:block\}/);
   assert.doesNotMatch(creatorStyle, /focus-visible\{[^}]*display:/);
+  assert.match(style, /\.gallery a\{display:block;color:inherit/);
+  assert.match(style, /@media\(hover:hover\)\{\.gallery a:hover h3\{color:var\(--accent\)\}/);
+  assert.match(style, /\.compact-link:hover \.compact-title\{color:var\(--accent\)\}/);
+  assert.match(style, /\.compact-link:hover \.link-direction svg\{transform:translateX\(3px\)\}/);
 });
