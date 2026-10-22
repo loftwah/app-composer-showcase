@@ -2,7 +2,7 @@
   "contract": 1,
   "id": "showcase",
   "name": "Linkarooie",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "repository": "https://github.com/loftwah/app-composer-showcase",
   "runtime": "cloudflare-worker",
   "entry": "src/worker.ts",
