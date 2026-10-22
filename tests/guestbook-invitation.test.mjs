@@ -31,7 +31,7 @@ function fixture({ mounted = false, state = 'open', configuration = 1 } = {}) {
     bind(...next) { return statement(sql, next); },
     async first() { return sqlite.prepare(sql).get(...values) ?? null; },
     async all() { return { results: sqlite.prepare(sql).all(...values) }; },
-    async run() { sqlite.prepare(sql).run(...values); return { success: true }; },
+    async run() { const result = sqlite.prepare(sql).run(...values); return { success: true, meta: { changes: Number(result.changes) } }; },
   });
   const publicOrigin = mounted ? 'https://composer.example.test' : 'https://showcase.example.test';
   const providerOrigin = mounted ? 'https://composer.example.test' : 'https://guestbook.example.test';
@@ -75,12 +75,23 @@ function fixture({ mounted = false, state = 'open', configuration = 1 } = {}) {
   globalThis.BUILD_SHA = 'f'.repeat(40);
   globalThis.MANIFEST = { id: 'showcase', contract: 1 };
   const base = mounted ? '/showcase' : '';
-  const request = (path, body, auth = true, origin = publicOrigin) => worker.fetch(new Request(publicOrigin + base + path, {
-    method: body === undefined ? 'GET' : 'POST',
-    headers: { ...(auth ? { Authorization: 'Bearer fictional-owner' } : {}), Origin: origin, 'Content-Type': 'application/json' },
-    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-  }), env, { waitUntil() { } });
-  return { sqlite, env, calls, request, publicOrigin, providerPath, close() { sqlite.close(); } };
+  const currentSetting = () => {
+    const row = sqlite.prepare("SELECT value FROM settings WHERE id='invitation'").get();
+    return row ? JSON.parse(row.value) : null;
+  };
+  const request = (path, body, auth = true, origin = publicOrigin) => {
+    // Ordinary clients send the setting they observed. Tests that exercise a
+    // stale observation pass expected explicitly; omitting it must fail.
+    const command = body && path === '/api/invitation' && body.action && !('expected' in body)
+      ? { ...body, expected: currentSetting() }
+      : body;
+    return worker.fetch(new Request(publicOrigin + base + path, {
+      method: command === undefined ? 'GET' : 'POST',
+      headers: { ...(auth ? { Authorization: 'Bearer fictional-owner' } : {}), Origin: origin, 'Content-Type': 'application/json' },
+      ...(command === undefined ? {} : { body: JSON.stringify(command) }),
+    }), env, { waitUntil() { } });
+  };
+  return { sqlite, env, calls, request, currentSetting, publicOrigin, providerPath, close() { sqlite.close(); } };
 }
 
 test('an owner links the exact Guestbook and the profile offers the real form only while it is open', async () => {
@@ -119,6 +130,39 @@ test('an owner links the exact Guestbook and the profile offers the real form on
     const closedPage = await (await f.request('/', undefined, false)).text();
     assert.doesNotMatch(closedPage, /guestbook-note-title/);
     assert.equal((await (await f.request('/api/export')).json()).guestbookInvitation, null);
+  } finally { f.close(); }
+});
+
+test('a stale tab cannot stop or replace a newer invitation choice', async () => {
+  const f = fixture();
+  try {
+    const first = { kind: 'guestbook.resource', version: 1, resource, configuration: 1 };
+    const second = { kind: 'guestbook.resource', version: 1, resource, configuration: 2 };
+    const enabledA = await (await f.request('/api/invitation', { action: 'enable', source: first, expected: null })).json();
+    assert.equal(enabledA.configured, true);
+    const settingA = { version: 1, source: first };
+    const enabledB = await (await f.request('/api/invitation', { action: 'enable', source: second, expected: settingA })).json();
+    assert.equal(enabledB.configured, true);
+    assert.deepEqual(enabledB.source, second);
+
+    const staleStop = await f.request('/api/invitation', { action: 'disable', expected: settingA });
+    assert.equal(staleStop.status, 409);
+    assert.match((await staleStop.json()).error, /changed in another tab/i);
+    assert.deepEqual(f.currentSetting(), { version: 1, source: second }, 'the newer choice survives');
+
+    const staleReplace = await f.request('/api/invitation', { action: 'enable', source: first, expected: settingA });
+    assert.equal(staleReplace.status, 409);
+    assert.deepEqual(f.currentSetting(), { version: 1, source: second });
+
+    const missingExpected = await f.request('/api/invitation', { action: 'disable', expected: undefined });
+    assert.equal(missingExpected.status, 400);
+    assert.deepEqual(f.currentSetting(), { version: 1, source: second });
+
+    const current = await (await f.request('/api/invitation')).json();
+    assert.deepEqual(current.source, second);
+    assert.equal((await f.request('/api/invitation', { action: 'disable', expected: { version: 1, source: second } })).status, 200);
+    assert.equal(f.currentSetting(), null);
+    assert.equal((await f.request('/api/invitation', { action: 'disable', expected: null })).status, 200, 'stopping an already-stopped invitation is a no-op');
   } finally { f.close(); }
 });
 
@@ -217,6 +261,7 @@ test('the owner studio explains review, approval and separate featuring and can 
     assert.equal((await f.request('/api/invitation', { action: 'enable', source })).status, 200);
     const after = await (await f.request('/owner')).text();
     assert.match(after, /Stop inviting notes from this Guestbook/);
+    assert.match(after, /name="expected"/, 'the owner form carries the observed setting');
     assert.match(after, /Open\. Visitors can send a note/);
     assert.match(after, /Review and approve notes in the Guestbook studio/);
     assert.equal((await f.request('/api/invitation', { action: 'disable' })).status, 200);

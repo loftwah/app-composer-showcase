@@ -13,8 +13,11 @@ async function api(path, data) {
     if (!value || typeof value !== "object" || Array.isArray(value))
         throw Error("The server returned an invalid response.");
     const result = value;
-    if (!response.ok)
-        throw Error(typeof result.error === "string" ? result.error : "Request failed");
+    if (!response.ok) {
+        const failure = Error(typeof result.error === "string" ? result.error : "Request failed");
+        failure.status = response.status;
+        throw failure;
+    }
     return result;
 }
 function report(error) {
@@ -80,20 +83,25 @@ invitation?.addEventListener("submit", async (event) => {
             ? "Stopping invitations…"
             : "Linking this Guestbook…";
     try {
+        const expected = JSON.parse(String(data.get("expected") ?? "null"));
         const command = operation === "disable"
-            ? { action: "disable" }
+            ? { action: "disable", expected }
             : {
                 action: "enable",
                 source: JSON.parse(String(data.get("source"))),
+                expected,
             };
         await api("/api/invitation", command);
         location.reload();
     }
     catch (error) {
         status.textContent =
-            error instanceof Error
+            (error instanceof Error
                 ? error.message
-                : "Could not change the invitation. Nothing else was changed.";
+                : "Could not change the invitation. Nothing else was changed.") +
+                (error.status === 409
+                    ? " Reload this page to see the newer invitation."
+                    : "");
     }
     finally {
         button.disabled = false;
