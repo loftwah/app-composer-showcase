@@ -75,4 +75,38 @@ config?.addEventListener("submit", async (event) => {
     button.disabled = false;
   }
 });
+const invitation = document.querySelector<HTMLFormElement>("#invitation");
+invitation?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const button = invitation.querySelector<HTMLButtonElement>("button")!,
+    status = invitation.querySelector<HTMLElement>(
+      "[data-invitation-message]",
+    )!,
+    operation =
+      invitation.dataset.operation === "disable" ? "disable" : "enable",
+    data = new FormData(invitation);
+  button.disabled = true;
+  status.textContent =
+    operation === "disable"
+      ? "Stopping invitations…"
+      : "Linking this Guestbook…";
+  try {
+    const command =
+      operation === "disable"
+        ? { action: "disable" as const }
+        : {
+            action: "enable" as const,
+            source: JSON.parse(String(data.get("source"))),
+          };
+    await api("/api/invitation", command);
+    location.reload();
+  } catch (error) {
+    status.textContent =
+      error instanceof Error
+        ? error.message
+        : "Could not change the invitation. Nothing else was changed.";
+  } finally {
+    button.disabled = false;
+  }
+});
 export {};

@@ -5,6 +5,7 @@ export interface ProviderEnvironment {
   PROVIDER_ORIGIN: string;
   PROVIDER_ID: string;
   PROVIDER_BASE?: string;
+  PROVIDER_MOUNT?: string;
 }
 export interface ResourceSource {
   kind: "guestbook.resource";
@@ -97,7 +98,7 @@ export function storedSource(row: Row): ResourceSource | undefined {
   });
 }
 
-function location(env: ProviderEnvironment) {
+export function providerLocation(env: ProviderEnvironment) {
   const origin = new URL(env.PROVIDER_ORIGIN);
   const base = env.PROVIDER_BASE ?? "";
   if (
@@ -123,7 +124,7 @@ async function readProvider(
   source?: ResourceSource,
 ): Promise<Row | null> {
   if (source && env.PROVIDER_ID !== "guestbook") return null;
-  const { origin, base } = location(env);
+  const { origin, base } = providerLocation(env);
   const response = await env.ITEM_PROVIDER.fetch(
     new Request(origin + base + prefix(source) + path, {
       redirect: "manual",
@@ -164,7 +165,7 @@ function eligibleItem(
     (source ? item.resource !== source.resource : item.resource !== undefined)
   )
     return null;
-  const { origin, base } = location(env);
+  const { origin, base } = providerLocation(env);
   let url: URL, image: URL;
   try {
     url = new URL(item.url);
