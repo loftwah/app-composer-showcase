@@ -1,3 +1,4 @@
+import { setupShareCard } from "./share-card-studio.js";
 import {
   field,
   failure,
@@ -79,7 +80,7 @@ if (cards) {
     const controls = new Map(
       [
         ...document.querySelectorAll<HTMLElement>(
-          "#cards,#manual,#feature,#achievement-studio,#tag-studio,#profile-portability,#config",
+          "#cards,#manual,#feature,#achievement-studio,#tag-studio,#profile-portability,#share-card-studio,#config",
         ),
       ]
         .flatMap((container) => [
@@ -156,6 +157,12 @@ if (cards) {
   );
   setupAchievements({ base, watch, lock, request, isBusy: () => busy });
   setupTags({ base, watch, lock, request, isBusy: () => busy });
+  setupShareCard({
+    base,
+    lock,
+    isBusy: () => busy,
+    registerDraft: (check) => draftChecks.push(check),
+  });
   setupProfileSettings({
     base,
     lock,

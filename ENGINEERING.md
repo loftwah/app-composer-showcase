@@ -29,3 +29,5 @@ view decisions shared by the Worker resolver/collection and reviewed consumers.
 It accepts only an already validated current provider item. A reviewed consumer
 may copy this MIT source at an exact application revision with its own isolated
 transport; no app record, account, credential or remote dependency is copied.
+
+Profile-card adoption is authored in `src/share-card.ts`; `src/browser/share-card-studio.ts` extends the existing owner mutation lock and draft protection. Shared bounded raster inspection and complete PNG validation are authored in `src/browser/share-image.mts`, generating the browser/Worker/Node-readable module and declaration. Source emission processes these shared declarations before Worker checking. `scripts/prepare-share-card.mjs` stages only inspected encoded output for the existing committed-assets release route; it has no deployment or owner activation authority. The public fictional example is authored in `src/launch-kit-example.ts` with reproducible recipe and exact image facts in `docs/examples/`.

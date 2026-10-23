@@ -1,3 +1,6 @@
+import {launchKitExample} from './launch-kit-example.ts';
+import {shareCardStudio} from './share-card-view.ts';
+import {shareCardSnapshot,changeShareCard,ShareCardError,publicShareCardMetadata} from './share-card.ts';
 import {cardDestination} from './card-view.ts';
 import { collectResourceItem, collectionWriteProof } from "./resource-collection.ts";
 import {
@@ -44,6 +47,7 @@ interface Env extends BaseEnv, PublisherEnv {
   PROVIDER_MOUNT: string;
   PROVIDER_BASE?: string;
   ASSETS?: Fetcher;
+  PROFILE_ORIGIN?:string;
 }
 const defaults = {
   title: "Linkarooie",
@@ -110,6 +114,7 @@ const app = {
       const owner = await authorised(req, env, "showcase_session");
       const common = await commonAPI(req, env, path, base, "showcase_session");
       if (common) return common;
+      if(path==='/examples/launch-kit/'&&['GET','HEAD'].includes(req.method)){const page=launchKitExample(env.PUBLIC_ORIGIN,base);return req.method==='HEAD'?new Response(null,{headers:page.headers}):page;}
       if(path==='/api/invitation'){
         if(!['GET','POST'].includes(req.method))return new Response(null,{status:405,headers:{Allow:'GET, POST','Cache-Control':'no-store'}});
         if(!owner)return error('Owner sign-in required',401);
@@ -131,6 +136,14 @@ const app = {
         if(!saved)return invitationReply(null,null);
         const state=await contribution(env);
         return invitationReply(state.setting,state.invitation);
+      }
+      if(path==='/api/share-card'){
+        if(!['GET','POST'].includes(req.method))return new Response(null,{status:405,headers:{Allow:'GET, POST','Cache-Control':'no-store'}});
+        if(!owner)return error('Owner sign-in required',401);
+        if(req.method==='GET')return json(await shareCardSnapshot(env,defaults,base));
+        if(req.headers.get('Origin')!==u.origin&&!req.headers.get('Authorization'))return error('Write origin is not authorised',403);
+        try{return json(await changeShareCard(env,await readJSON(req,16384),defaults,base));}
+        catch(failure){if(failure instanceof ShareCardError)return error(failure.message,failure.status);throw failure;}
       }
       if(path==='/api/profile-settings'){
         if(!['GET','POST'].includes(req.method))return new Response(null,{status:405,headers:{Allow:'GET, POST','Cache-Control':'no-store'}});
@@ -351,7 +364,8 @@ const app = {
           ...invitation,
         });
       }
-      const config = profileConfiguration(await settings(env, defaults));
+      const savedProfile = await settings(env, defaults);
+      const config:Record<string,unknown> = {...profileConfiguration(savedProfile),...publicShareCardMetadata(savedProfile)};
       if (path === "/owner") {
         if (!owner)
           return html(
@@ -387,7 +401,7 @@ const app = {
         }));
         return html(
           String(config.title),
-          `<h1>The collection studio.</h1><p>Choose, order and publish up to 64 cards. Featured contributions are checked against their source on every public request.</p><div class="row"><button id="logout" class="secondary">Sign out</button><a href="${base}/api/export">Export your collection</a></div><p role="status" class="message" aria-live="polite"></p>${configForm(config)}${profilePortabilityStudio(base)}${invitationStudio(invitationState.setting,invitationState.invitation,[...sourceOptions].map(([value,label])=>({value,label})),guestbookStudio)}<h2>Feature an approved moment</h2><form id="feature">${selectedSource ? `<input type="hidden" name="source" value="${escape(JSON.stringify(selectedSource))}">` : ""}<label>Source contribution<select name="item" required><option value="">Choose a moment</option>${(available?.items ?? []).map((p: any) => `<option value="${escape(p.id)}">${escape(p.title)}</option>`).join("")}</select></label><button ${available ? "" : "disabled"}>Feature publicly</button></form>${available ? "" : "<p>The source is unavailable. Existing private or unavailable items stay hidden.</p>"}<h2>Add your own card</h2><form id="manual"><label>Title<input name="title" maxlength="100" required></label><label>Description<textarea name="description" maxlength="240"></textarea></label><label>Destination<input name="url" type="url" placeholder="https://" required></label><button>Add a draft</button></form><h2>Arrange the collection</h2><div id="cards" data-base="${base}" data-source="${escape(BUILD_SHA)}" data-target="${escape(u.origin + base)}">${currentCards.map((card: any) => {const c={...card,...(savedStyles[card.id]??{pinned:false,icon:'link'})};return `<article data-card="${escape(c.id)}"><h3>${escape(c.title)}</h3><p>${escape(c.status)} · ${c.provider ? "Linked source contribution · content follows its source" : "Your authored card"}</p>${c.provider ? "" : `<details class="card-editor"><summary>Edit this link</summary><form data-edit-card data-link-snapshot="${escape(JSON.stringify({title:c.title,description:c.description,url:c.url,status:c.status}))}"><label>Card title<input name="title" maxlength="100" value="${escape(c.title)}" required></label><label>Card description<textarea name="description" maxlength="240">${escape(c.description)}</textarea></label><label>Card destination<input name="url" type="url" pattern="https://.*" value="${escape(c.url)}" required></label><p class="small">Use a public HTTPS link. Saving keeps the visibility you select below.</p><label>Visibility<select name="status">${["draft","published","hidden"].map(status=>`<option value="${status}" ${c.status===status?"selected":""}>${status}</option>`).join("")}</select></label><div class="row"><button type="submit">Save card</button><button type="button" class="secondary" data-preview-card>Preview without saving</button></div><div class="card-draft-preview" data-card-preview hidden><p class="small">Preview · not saved</p><a target="_blank" rel="noopener noreferrer"><strong></strong><span></span><small></small></a></div><p data-edit-message role="status" aria-live="polite"></p></form></details>`}${styleForm(c)}<div class="row card-actions"><button type="button" data-move="up" class="secondary">Move up</button><button type="button" data-move="down" class="secondary">Move down</button><button type="button" data-status="published" class="secondary">Publish</button><button type="button" data-status="hidden" class="secondary">Hide</button><button type="button" data-delete="true" class="secondary">Remove</button></div></article>`;}).join("")}</div>${achievementStudio(achievements)}${tagStudio(tags)}${client(base, "showcase_session")}<script type="module" src="${base}/brand/collection-studio.js"></script>`,
+          `<h1>The collection studio.</h1><p>Choose, order and publish up to 64 cards. Featured contributions are checked against their source on every public request.</p><div class="row"><button id="logout" class="secondary">Sign out</button><a href="${base}/api/export">Export your collection</a></div><p role="status" class="message" aria-live="polite"></p>${configForm(config)}${shareCardStudio()}${profilePortabilityStudio(base)}${invitationStudio(invitationState.setting,invitationState.invitation,[...sourceOptions].map(([value,label])=>({value,label})),guestbookStudio)}<h2>Feature an approved moment</h2><form id="feature">${selectedSource ? `<input type="hidden" name="source" value="${escape(JSON.stringify(selectedSource))}">` : ""}<label>Source contribution<select name="item" required><option value="">Choose a moment</option>${(available?.items ?? []).map((p: any) => `<option value="${escape(p.id)}">${escape(p.title)}</option>`).join("")}</select></label><button ${available ? "" : "disabled"}>Feature publicly</button></form>${available ? "" : "<p>The source is unavailable. Existing private or unavailable items stay hidden.</p>"}<h2>Add your own card</h2><form id="manual"><label>Title<input name="title" maxlength="100" required></label><label>Description<textarea name="description" maxlength="240"></textarea></label><label>Destination<input name="url" type="url" placeholder="https://" required></label><button>Add a draft</button></form><h2>Arrange the collection</h2><div id="cards" data-base="${base}" data-source="${escape(BUILD_SHA)}" data-target="${escape(u.origin + base)}">${currentCards.map((card: any) => {const c={...card,...(savedStyles[card.id]??{pinned:false,icon:'link'})};return `<article data-card="${escape(c.id)}"><h3>${escape(c.title)}</h3><p>${escape(c.status)} · ${c.provider ? "Linked source contribution · content follows its source" : "Your authored card"}</p>${c.provider ? "" : `<details class="card-editor"><summary>Edit this link</summary><form data-edit-card data-link-snapshot="${escape(JSON.stringify({title:c.title,description:c.description,url:c.url,status:c.status}))}"><label>Card title<input name="title" maxlength="100" value="${escape(c.title)}" required></label><label>Card description<textarea name="description" maxlength="240">${escape(c.description)}</textarea></label><label>Card destination<input name="url" type="url" pattern="https://.*" value="${escape(c.url)}" required></label><p class="small">Use a public HTTPS link. Saving keeps the visibility you select below.</p><label>Visibility<select name="status">${["draft","published","hidden"].map(status=>`<option value="${status}" ${c.status===status?"selected":""}>${status}</option>`).join("")}</select></label><div class="row"><button type="submit">Save card</button><button type="button" class="secondary" data-preview-card>Preview without saving</button></div><div class="card-draft-preview" data-card-preview hidden><p class="small">Preview · not saved</p><a target="_blank" rel="noopener noreferrer"><strong></strong><span></span><small></small></a></div><p data-edit-message role="status" aria-live="polite"></p></form></details>`}${styleForm(c)}<div class="row card-actions"><button type="button" data-move="up" class="secondary">Move up</button><button type="button" data-move="down" class="secondary">Move down</button><button type="button" data-status="published" class="secondary">Publish</button><button type="button" data-status="hidden" class="secondary">Hide</button><button type="button" data-delete="true" class="secondary">Remove</button></div></article>`;}).join("")}</div>${achievementStudio(achievements)}${tagStudio(tags)}${client(base, "showcase_session")}<script type="module" src="${base}/brand/collection-studio.js"></script>`,
           base,
           "showcase",
           String(config.theme),
@@ -429,7 +443,7 @@ const app = {
       return error("Page not found", 404);
     } catch (e) {
       if(e instanceof SourceSelectionError)return error(e.message,400);
-      if(e instanceof AchievementError||e instanceof TagError||e instanceof ProfilePortabilityError)return error(e.message,e.status);
+      if(e instanceof AchievementError||e instanceof TagError||e instanceof ProfilePortabilityError||e instanceof ShareCardError)return error(e.message,e.status);
       return error(e instanceof Error ? e.message : "Request failed", 400);
     }
   },

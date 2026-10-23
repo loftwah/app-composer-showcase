@@ -1,4 +1,5 @@
 // Generated from checked TypeScript; edit src/browser or src/publisher.mts. MIT.
+import { setupShareCard } from "./share-card-studio.js";
 import { field, failure, record, } from "./studio-dom.js";
 import { setupAchievements } from "./achievements-studio.js";
 import { setupTags } from "./tags-studio.js";
@@ -61,7 +62,7 @@ if (cards) {
             return null;
         }
         const controls = new Map([
-            ...document.querySelectorAll("#cards,#manual,#feature,#achievement-studio,#tag-studio,#profile-portability,#config"),
+            ...document.querySelectorAll("#cards,#manual,#feature,#achievement-studio,#tag-studio,#profile-portability,#share-card-studio,#config"),
         ]
             .flatMap((container) => [
             ...container.querySelectorAll("button,input,textarea,select"),
@@ -120,6 +121,12 @@ if (cards) {
     }, true);
     setupAchievements({ base, watch, lock, request, isBusy: () => busy });
     setupTags({ base, watch, lock, request, isBusy: () => busy });
+    setupShareCard({
+        base,
+        lock,
+        isBusy: () => busy,
+        registerDraft: (check) => draftChecks.push(check),
+    });
     setupProfileSettings({
         base,
         lock,

@@ -6,6 +6,12 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("../", import.meta.url));
 const files = [
   "src/publisher.mts",
+  "src/share-card.ts",
+  "src/launch-kit-example.ts",
+  "tests/share-card.test.mjs",
+  "tests/share-card-prepare.test.mjs",
+  "src/share-card-view.ts",
+  "scripts/prepare-share-card.mjs",
   "src/card-view.ts",
   "tests/card-view.test.mjs",
   "src/item-provider.ts",

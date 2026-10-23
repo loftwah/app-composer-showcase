@@ -1,0 +1,26 @@
+{
+  "image": {
+    "path": "/brand/generated/profile-eb7c5b695a43702bf42effce699eb93f4a407be5289fd96a964561e315a89a4f.png",
+    "sha256": "eb7c5b695a43702bf42effce699eb93f4a407be5289fd96a964561e315a89a4f",
+    "type": "image/png",
+    "width": 1200,
+    "height": 630,
+    "alt": "River Morgan's profile card, introducing their creative work."
+  },
+  "text": {
+    "name": "River Morgan",
+    "handle": "rivermorgan",
+    "description": "Good work. Open skies.\nA little room to explore.",
+    "alt": "River Morgan's profile card, introducing their creative work."
+  },
+  "preset": {
+    "id": "typography",
+    "version": 1
+  },
+  "renderer": {
+    "id": "launch-kit-profile",
+    "version": "1.0.0",
+    "font": "Space Grotesk Latin 20261018",
+    "fontSha256": "61d00a1c57fcd7d4826c7a69cd85b61d15d133d5471d3c9c4731d70193d9f71f"
+  }
+}
