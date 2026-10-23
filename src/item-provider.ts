@@ -1,3 +1,4 @@
+import { linkedCardContent } from "./card-view.ts";
 // A source reference chooses records inside the one configured app binding.
 // It never supplies an origin, request header, account or execution authority.
 export interface ProviderEnvironment {
@@ -248,17 +249,8 @@ export async function resolveCard(
     return null;
   const source = storedSource(card);
   const item = await providerItem(env, card.item_id, source);
-  return item
-    ? {
-        ...card,
-        id: card.id,
-        title: item.title,
-        description: item.description,
-        url: item.url,
-        image: item.image,
-        ...(source ? { source } : {}),
-      }
-    : null;
+  const resolved = linkedCardContent({ ...card, id: card.id }, item);
+  return resolved ? { ...resolved, ...(source ? { source } : {}) } : null;
 }
 
 export async function exportCard(

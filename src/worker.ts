@@ -1,3 +1,4 @@
+import {cardDestination} from './card-view.ts';
 import { collectResourceItem, collectionWriteProof } from "./resource-collection.ts";
 import {
   providerItems,
@@ -408,7 +409,7 @@ const app = {
         const savedInvitation=await contribution(env);
         const contributionHTML=contributionSection(savedInvitation.invitation,value=>invitationHref(env,value,base));
         const share=`<div class="profile-share"><button type="button" class="secondary" data-share-profile hidden>Share profile</button><button type="button" class="secondary" data-copy-profile hidden>Copy profile link</button><p role="status" aria-live="polite" data-share-status></p><label data-share-fallback hidden>Published profile URL<input readonly value="${escape(new URL(env.PUBLIC_ORIGIN).origin+base+'/')}"></label></div><script type="module" src="${base}/brand/profile-share.js"></script>`;
-        const href=(c:any)=>c.provider&&base?(new URL(c.url).pathname.startsWith(env.PROVIDER_MOUNT+'/')?new URL(c.url).pathname:env.PROVIDER_MOUNT+new URL(c.url).pathname):c.url;
+        const href=(c:any)=>cardDestination(c,base,env.PROVIDER_MOUNT);
         const cardMarkup=(c:any)=>config.layout==='compact'?`<article data-gallery-item data-kind="${c.provider?'photo':'link'}"><a class="compact-link" href="${escape(href(c))}"><span class="link-symbol">${icon(c.icon)}</span><span class="compact-copy"><span class="compact-title">${escape(c.title)}</span>${c.description?`<span class="compact-description">${escape(c.description)}</span>`:''}<span class="compact-destination">${escape(new URL(c.url).hostname)}${c.pinned?' · Pinned':''}</span></span><span class="link-direction">${icon('arrow')}</span></a></article>`:`<article data-gallery-item data-kind="${c.provider?'photo':'link'}"><a href="${escape(href(c))}">${c.image?`<img src="${escape(c.image)}" alt="${escape(c.title)}" width="1200" height="900" loading="lazy">`:`<div class="link-preview"><span class="link-symbol">${icon(c.icon)}</span><strong>${escape(new URL(c.url).hostname)}</strong></div>`}<h3>${escape(c.title)}</h3></a><p>${escape(c.description)}</p><span class="badge">${c.pinned?'Pinned · ':''}${c.provider?'Live source contribution':'Curated link'}</span></article>`;
         return html(
           String(config.title),
