@@ -123,3 +123,12 @@ A confirmed scoped collection returns its stable card `id`, `source`, visibility
 ## Launch Kit profile cards
 
 The owner studio opens the offline profile-card editor with the selected public name, handle, bio and saved revision while retaining unsaved work. Compare the current image and inspected PNG, then deliberately publish an already deployed immutable asset. A guarded revision check protects manual overrides and newer profile/media changes; the previous image can be restored. The existing committed-assets release route remains explicit. [Local command, owner API and publication guide](docs/launch-kit-publication.md). [Clearly fictional published example](/examples/launch-kit/) demonstrates the actual rendered card and matching PNG metadata without changing owner artwork.
+
+## Invited creator profiles
+
+Composer's `/me` entry can maintain independently owned Linkarooie profiles and
+explicitly publish their saved drafts at `/p/<handle>/`. This additive optional
+bridge uses the existing EmDash account authority and current Composer grants;
+standalone owner credentials do not create member access. Existing root content,
+URLs, artwork and settings stay intact. Apply forward migration `0003` before
+release. [Commands, ownership, publisher hand-off and non-destructive recovery](docs/member-profiles.md).

@@ -28,6 +28,7 @@
   },
   "vars": {
     "PUBLIC_ORIGIN": "https://showcase.loftwah.com",
+    "COMPOSER_ISSUER": "https://composer.loftwah.com",
     "PROFILE_ORIGIN": "https://showcase.loftwah.com",
     "PROVIDER_ORIGIN": "https://guestbook.loftwah.com",
     "PROVIDER_ID": "guestbook",
