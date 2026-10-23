@@ -15,5 +15,8 @@
   "profile-tag-fields.mjs": "public/brand/profile-tag-fields.mjs",
   "profile-tag-fields.d.mts": "public/brand/profile-tag-fields.d.mts",
   "studio-dom.js": "public/brand/studio-dom.js",
-  "owner.js": "public/brand/owner.js"
+  "owner.js": "public/brand/owner.js",
+  "share-image.mjs": "public/brand/share-image.mjs",
+  "share-image.d.mts": "public/brand/share-image.d.mts",
+  "share-card-studio.js": "public/brand/share-card-studio.js"
 }

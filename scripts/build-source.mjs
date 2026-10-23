@@ -12,9 +12,9 @@ const destinations = JSON.parse(
 );
 let emitted = 0;
 for (const name of [
-  "tsconfig.json",
-  "tsconfig.publisher.json",
   "tsconfig.browser.json",
+  "tsconfig.publisher.json",
+  "tsconfig.json",
 ]) {
   const config = ts.readConfigFile(resolve(root, name), ts.sys.readFile);
   if (config.error)

@@ -2,7 +2,7 @@
   "contract": 1,
   "id": "showcase",
   "name": "Linkarooie",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "repository": "https://github.com/loftwah/app-composer-showcase",
   "runtime": "cloudflare-worker",
   "entry": "src/worker.ts",
@@ -159,5 +159,11 @@
     "provider": "guestbook",
     "selection": "explicit-resource-and-activated-configuration",
     "eligibility": "checked-at-each-render-and-export"
+  },
+  "profileShareCard": {
+    "version": 1,
+    "format": "linkarooie.share-card",
+    "maxReceiptBytes": 16384,
+    "activation": "deployed-immutable-asset"
   }
 }
