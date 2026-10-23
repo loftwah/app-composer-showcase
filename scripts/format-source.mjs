@@ -7,6 +7,8 @@ const root = fileURLToPath(new URL("../", import.meta.url));
 const files = [
   "src/publisher.mts",
   "src/share-card.ts",
+  "src/member-profiles.ts",
+  "tests/member-profiles.test.mjs",
   "src/launch-kit-example.ts",
   "tests/share-card.test.mjs",
   "tests/share-card-prepare.test.mjs",

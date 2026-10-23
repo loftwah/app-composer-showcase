@@ -98,3 +98,51 @@ test("a header-only PNG, damaged compressed data and linked output directory fai
     await rm(root, { recursive: true, force: true });
   }
 });
+test("publisher snapshot binding refuses another profile, stale revision and changed text before writing assets", async () => {
+  const root = await mkdtemp(join(tmpdir(), "showcase-share-snapshot-"));
+  try {
+    await mkdir(join(root, "public/brand"), { recursive: true });
+    const image = join(root, "image.png"),
+      spec = join(root, "recipe.json"),
+      snapshot = join(root, "snapshot.json"),
+      output = join(root, "receipt.json");
+    await writeFile(image, bytes);
+    await writeFile(spec, JSON.stringify(recipe));
+    const saved = {
+      format: "linkarooie.profile-snapshot",
+      version: 1,
+      profile: recipe.profile,
+      text: recipe.text,
+    };
+    for (const wrong of [
+      {
+        ...saved,
+        profile: {
+          ...saved.profile,
+          id: "https://other.test/profiles/someone",
+        },
+      },
+      { ...saved, profile: { ...saved.profile, revision: "b".repeat(64) } },
+      { ...saved, text: { ...saved.text, name: "Other fictional person" } },
+    ]) {
+      await writeFile(snapshot, JSON.stringify(wrong));
+      await assert.rejects(
+        prepareShareCard({ recipe: spec, image, output, snapshot, root }),
+        /exact saved profile snapshot/,
+      );
+      await assert.rejects(readFile(output), { code: "ENOENT" });
+    }
+    await writeFile(snapshot, JSON.stringify(saved));
+    const result = await prepareShareCard({
+      recipe: spec,
+      image,
+      output,
+      snapshot,
+      root,
+    });
+    assert.equal(result.snapshotVerified, true);
+    assert.deepEqual(result.profile, recipe.profile);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

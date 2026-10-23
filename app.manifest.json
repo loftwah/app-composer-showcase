@@ -2,7 +2,7 @@
   "contract": 1,
   "id": "showcase",
   "name": "Linkarooie",
-  "version": "1.9.0",
+  "version": "1.10.0",
   "repository": "https://github.com/loftwah/app-composer-showcase",
   "runtime": "cloudflare-worker",
   "entry": "src/worker.ts",
@@ -165,5 +165,12 @@
     "format": "linkarooie.share-card",
     "maxReceiptBytes": 16384,
     "activation": "deployed-immutable-asset"
+  },
+  "memberProfiles": {
+    "version": 1,
+    "ownership": "installation-account",
+    "publication": "explicit-snapshot",
+    "publicPath": "/p/:handle/",
+    "bridge": "/api/member-profiles"
   }
 }

@@ -29,6 +29,7 @@ type Environment = {
   DB: D1Database;
   PUBLIC_ORIGIN: string;
   PROFILE_ORIGIN?: string;
+  PROFILE_ID?: string;
   ASSETS?: Fetcher;
 };
 const digest = async (value: Uint8Array | string) =>
@@ -130,7 +131,9 @@ function snapshot(
   return {
     version: 1,
     profile: {
-      id: new URL(env.PROFILE_ORIGIN ?? env.PUBLIC_ORIGIN).origin + "/",
+      id:
+        env.PROFILE_ID ??
+        new URL(env.PROFILE_ORIGIN ?? env.PUBLIC_ORIGIN).origin + "/",
       revision: state.revision,
       name: String(state.config.title),
       handle: String(state.config.handle),
@@ -203,7 +206,7 @@ export async function changeShareCard(
     if (
       receipt.format !== "linkarooie.share-card" ||
       receipt.version !== 1 ||
-      profile.id !== identity + "/" ||
+      profile.id !== (env.PROFILE_ID ?? identity + "/") ||
       profile.revision !== command.expectedRevision ||
       typeof preset.id !== "string" ||
       !["typography", "portrait", "editorial", "music", "artwork"].includes(

@@ -11,6 +11,7 @@ export async function prepareShareCard({
   recipe,
   image,
   output,
+  snapshot,
   root = fileURLToPath(new URL("../", import.meta.url)),
 }) {
   const spec = JSON.parse(await readFile(recipe, "utf8")),
@@ -45,6 +46,24 @@ export async function prepareShareCard({
     throw Error(
       "Choose a recipe made from the intended Linkarooie owner profile snapshot.",
     );
+  if (snapshot) {
+    const value = JSON.parse(await readFile(snapshot, "utf8"));
+    const saved = value.profile;
+    if (
+      value.format !== "linkarooie.profile-snapshot" ||
+      value.version !== 1 ||
+      !saved ||
+      saved.id !== spec.profile.id ||
+      saved.revision !== spec.profile.revision ||
+      value.text?.name !== spec.text?.name ||
+      value.text?.handle !== spec.text?.handle ||
+      value.text?.description !== spec.text?.description
+    ) {
+      throw Error(
+        "The selected recipe does not match this exact saved profile snapshot. Nothing was prepared.",
+      );
+    }
+  }
   await validateCardPNG(bytes);
   const sha256 = createHash("sha256").update(bytes).digest("hex"),
     path = "/brand/generated/profile-" + sha256 + ".png";
@@ -109,6 +128,8 @@ export async function prepareShareCard({
     asset: resolve(root, "public" + path),
     receipt: resolve(output),
     sha256,
+    profile: spec.profile,
+    snapshotVerified: Boolean(snapshot),
     published: false,
     next: "Review and commit the image, run the existing guarded release, then explicitly apply this receipt in the owner studio.",
   };
@@ -117,13 +138,13 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   try {
     const args = process.argv.slice(2),
       values = {};
-    if (args.length !== 6)
+    if (![6, 8].includes(args.length))
       throw Error(
-        "Use --recipe recipe.json --image profile.png --output adoption.json",
+        "Use --recipe recipe.json --image profile.png --output adoption.json [--snapshot saved-profile.json]",
       );
     for (let i = 0; i < args.length; i += 2) {
       if (
-        !["--recipe", "--image", "--output"].includes(args[i]) ||
+        !["--recipe", "--image", "--output", "--snapshot"].includes(args[i]) ||
         values[args[i].slice(2)]
       )
         throw Error("Use each supported option once.");

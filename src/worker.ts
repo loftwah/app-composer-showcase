@@ -1,3 +1,4 @@
+import {memberProfileBridge,publicMemberProfile} from "./member-profiles.ts";
 import {launchKitExample} from './launch-kit-example.ts';
 import {shareCardStudio} from './share-card-view.ts';
 import {shareCardSnapshot,changeShareCard,ShareCardError,publicShareCardMetadata} from './share-card.ts';
@@ -48,6 +49,8 @@ interface Env extends BaseEnv, PublisherEnv {
   PROVIDER_BASE?: string;
   ASSETS?: Fetcher;
   PROFILE_ORIGIN?:string;
+  COMPOSER_ISSUER?:string;
+  COMPOSER_PROFILE_BRIDGE_TOKEN?:string;
 }
 const defaults = {
   title: "Linkarooie",
@@ -111,6 +114,8 @@ const app = {
       const u = new URL(req.url),
         base = basePath(u, "showcase"),
         path = u.pathname.slice(base.length) || "/";
+      if(path==='/api/member-profiles')return memberProfileBridge(req,env,base,BUILD_SHA);
+      if(path.startsWith('/p/'))return publicMemberProfile(req,env,base,path);
       const owner = await authorised(req, env, "showcase_session");
       const common = await commonAPI(req, env, path, base, "showcase_session");
       if (common) return common;
