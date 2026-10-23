@@ -23,3 +23,9 @@ The Worker program uses Workers globals and the browser program uses DOM globals
 The deployment script captures the reviewed SHA/config/source before checking and building, then rechecks main/HEAD/origin-main, clean status, config and all tracked file bytes/types immediately before upload, including assume-unchanged/skip-worktree edits. It explicitly selects root `wrangler.jsonc` and the default environment. Local browser and build evidence does not establish production, physical-device or platform-unfurl acceptance.
 
 Linkarooie owns its D1 profile configuration, authored cards, independent card presentation, tags and achievements. It consumes Guestbook's contract-1 `/api/items` and `/api/items/:id` through its reviewed provider binding/origin. Guestbook owns contribution records, private media and approval/revocation: featuring a moment here never grants permission to upload, approve or retain a private source item. Each public request rechecks linked items; unavailable/private items stay hidden. No resource identifiers, binding targets, provider schemas or Composer source pins change in this source-maintenance slice.
+
+`src/card-view.ts` owns the browser-safe linked-content and mounted-destination
+view decisions shared by the Worker resolver/collection and reviewed consumers.
+It accepts only an already validated current provider item. A reviewed consumer
+may copy this MIT source at an exact application revision with its own isolated
+transport; no app record, account, credential or remote dependency is copied.
