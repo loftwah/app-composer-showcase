@@ -172,5 +172,25 @@
     "publication": "explicit-snapshot",
     "publicPath": "/p/:handle/",
     "bridge": "/api/member-profiles"
+  },
+  "agentCapabilities": {
+    "version": 1,
+    "ui": "https://showcase.loftwah.com",
+    "storage": "app-owned",
+    "operations": [
+      {
+        "name": "read-public-profile",
+        "description": "Read one explicitly published profile snapshot. Draft profile edits and owner configuration stay private.",
+        "kind": "read",
+        "method": "GET",
+        "path": "/p/:handle/",
+        "availability": "public",
+        "requires": [
+          "none"
+        ],
+        "confirmation": false,
+        "verified": "2026-11-07"
+      }
+    ]
   }
 }
