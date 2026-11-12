@@ -197,3 +197,26 @@ test('profile image hostnames cannot inject content-security-policy directives',
  const {html}=await import('../src/common.ts');const response=html('Profile','<h1>Profile</h1>','','showcase','midnight','Bio','https://showcase.example.test','/','https://photos.example.test',{avatar:'https://example.test;form-action/',banner:'https://evil.example.test/'});
  const policy=response.headers.get('Content-Security-Policy');assert(!policy.includes('example.test;form-action'));assert.equal((policy.match(/(?:^|;)\s*form-action /g)||[]).length,1);assert.match(policy,/form-action 'self'/);
 });
+
+
+test('owner can publish a curated link with no Guestbook configuration', async () => {
+ const f = fixture();
+ try {
+  for (const key of ['ITEM_PROVIDER', 'PROVIDER_ORIGIN', 'PROVIDER_ID', 'PROVIDER_MOUNT']) delete f.env[key];
+  const studio = await f.request('/owner');
+  assert.equal(studio.status, 200);
+  const studioHtml = await studio.text();
+  assert.match(studioHtml, /Add your own card/);
+  assert.doesNotMatch(studioHtml, /Feature an approved moment|Invite a note/);
+  const created = await f.request('/api/cards', {
+   title: 'Independent fictional link', url: 'https://example.test/link', status: 'published',
+  });
+  assert.equal(created.status, 201);
+  const publicPage = await f.request('/', null, false);
+  assert.equal(publicPage.status, 200);
+  assert.match(await publicPage.text(), /Independent fictional link/);
+  assert.equal((await f.request('/api/provider')).status, 503);
+ } finally {
+  f.sqlite.close();
+ }
+});

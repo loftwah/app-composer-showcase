@@ -12,6 +12,7 @@ import {
   sourceSelection,
   querySource,
   SourceSelectionError,
+  type ProviderEnvironment,
 } from "./item-provider.ts";
 import {creatorProfile} from './creator-profile.ts';
 import {contributionSection} from './contribution-view.ts';
@@ -41,12 +42,7 @@ import {
   text,
   type BaseEnv,
 } from "./common.ts";
-interface Env extends BaseEnv, PublisherEnv {
-  ITEM_PROVIDER: Fetcher;
-  PROVIDER_ORIGIN: string;
-  PROVIDER_ID: string;
-  PROVIDER_MOUNT: string;
-  PROVIDER_BASE?: string;
+interface Env extends BaseEnv, PublisherEnv, ProviderEnvironment {
   ASSETS?: Fetcher;
   PROFILE_ORIGIN?:string;
   COMPOSER_ISSUER?:string;
@@ -116,6 +112,7 @@ const app = {
         path = u.pathname.slice(base.length) || "/";
       if(path==='/api/member-profiles')return memberProfileBridge(req,env,base,BUILD_SHA);
       if(path.startsWith('/p/'))return publicMemberProfile(req,env,base,path);
+      const providerOrigin = env.ITEM_PROVIDER && env.PROVIDER_ID ? env.PROVIDER_ORIGIN : undefined;
       const owner = await authorised(req, env, "showcase_session");
       const common = await commonAPI(req, env, path, base, "showcase_session");
       if (common) return common;
@@ -382,7 +379,7 @@ const app = {
             String(config.intro),
             env.PUBLIC_ORIGIN,
             path,
-            env.PROVIDER_ORIGIN,
+            providerOrigin,
           );
         const { results } = await env.DB.prepare(
           "SELECT * FROM cards ORDER BY position,id LIMIT 64",
@@ -391,9 +388,11 @@ const app = {
         const achievements=await readAchievements(env.DB).then(saved=>saved.collection).catch(()=>null);
         const tags=await readTags(env.DB).then(saved=>saved.collection).catch(()=>null);
         const selectedSource = querySource(u.searchParams);
-        const available = await providerItems(env, selectedSource).catch(() => null);
-        const invitationState = await contribution(env);
-        const guestbookStudio = base ? `${env.PROVIDER_MOUNT}/owner` : new URL('/owner', env.PROVIDER_ORIGIN).href;
+        const guestbookStudio = providerOrigin
+          ? base ? `${env.PROVIDER_MOUNT ?? "/guestbook"}/owner` : new URL('/owner', providerOrigin).href
+          : null;
+        const available = guestbookStudio ? await providerItems(env, selectedSource).catch(() => null) : null;
+        const invitationState = guestbookStudio ? await contribution(env) : null;
         const sourceOptions = new Map<string,string>();
         if (selectedSource) sourceOptions.set(JSON.stringify(selectedSource), 'Guestbook selected for this studio');
         for (const card of results) {
@@ -406,14 +405,14 @@ const app = {
         }));
         return html(
           String(config.title),
-          `<h1>The collection studio.</h1><p>Choose, order and publish up to 64 cards. Featured contributions are checked against their source on every public request.</p><div class="row"><button id="logout" class="secondary">Sign out</button><a href="${base}/api/export">Export your collection</a></div><p role="status" class="message" aria-live="polite"></p>${configForm(config)}${shareCardStudio()}${profilePortabilityStudio(base)}${invitationStudio(invitationState.setting,invitationState.invitation,[...sourceOptions].map(([value,label])=>({value,label})),guestbookStudio)}<h2>Feature an approved moment</h2><form id="feature">${selectedSource ? `<input type="hidden" name="source" value="${escape(JSON.stringify(selectedSource))}">` : ""}<label>Source contribution<select name="item" required><option value="">Choose a moment</option>${(available?.items ?? []).map((p: any) => `<option value="${escape(p.id)}">${escape(p.title)}</option>`).join("")}</select></label><button ${available ? "" : "disabled"}>Feature publicly</button></form>${available ? "" : "<p>The source is unavailable. Existing private or unavailable items stay hidden.</p>"}<h2>Add your own card</h2><form id="manual"><label>Title<input name="title" maxlength="100" required></label><label>Description<textarea name="description" maxlength="240"></textarea></label><label>Destination<input name="url" type="url" placeholder="https://" required></label><button>Add a draft</button></form><h2>Arrange the collection</h2><div id="cards" data-base="${base}" data-source="${escape(BUILD_SHA)}" data-target="${escape(u.origin + base)}">${currentCards.map((card: any) => {const c={...card,...(savedStyles[card.id]??{pinned:false,icon:'link'})};return `<article data-card="${escape(c.id)}"><h3>${escape(c.title)}</h3><p>${escape(c.status)} · ${c.provider ? "Linked source contribution · content follows its source" : "Your authored card"}</p>${c.provider ? "" : `<details class="card-editor"><summary>Edit this link</summary><form data-edit-card data-link-snapshot="${escape(JSON.stringify({title:c.title,description:c.description,url:c.url,status:c.status}))}"><label>Card title<input name="title" maxlength="100" value="${escape(c.title)}" required></label><label>Card description<textarea name="description" maxlength="240">${escape(c.description)}</textarea></label><label>Card destination<input name="url" type="url" pattern="https://.*" value="${escape(c.url)}" required></label><p class="small">Use a public HTTPS link. Saving keeps the visibility you select below.</p><label>Visibility<select name="status">${["draft","published","hidden"].map(status=>`<option value="${status}" ${c.status===status?"selected":""}>${status}</option>`).join("")}</select></label><div class="row"><button type="submit">Save card</button><button type="button" class="secondary" data-preview-card>Preview without saving</button></div><div class="card-draft-preview" data-card-preview hidden><p class="small">Preview · not saved</p><a target="_blank" rel="noopener noreferrer"><strong></strong><span></span><small></small></a></div><p data-edit-message role="status" aria-live="polite"></p></form></details>`}${styleForm(c)}<div class="row card-actions"><button type="button" data-move="up" class="secondary">Move up</button><button type="button" data-move="down" class="secondary">Move down</button><button type="button" data-status="published" class="secondary">Publish</button><button type="button" data-status="hidden" class="secondary">Hide</button><button type="button" data-delete="true" class="secondary">Remove</button></div></article>`;}).join("")}</div>${achievementStudio(achievements)}${tagStudio(tags)}${client(base, "showcase_session")}<script type="module" src="${base}/brand/collection-studio.js"></script>`,
+          `<h1>The collection studio.</h1><p>Choose, order and publish up to 64 cards. Featured contributions are checked against their source on every public request.</p><div class="row"><button id="logout" class="secondary">Sign out</button><a href="${base}/api/export">Export your collection</a></div><p role="status" class="message" aria-live="polite"></p>${configForm(config)}${shareCardStudio()}${profilePortabilityStudio(base)}${guestbookStudio && invitationState ? `${invitationStudio(invitationState.setting,invitationState.invitation,[...sourceOptions].map(([value,label])=>({value,label})),guestbookStudio)}<h2>Feature an approved moment</h2><form id="feature">${selectedSource ? `<input type="hidden" name="source" value="${escape(JSON.stringify(selectedSource))}">` : ""}<label>Source contribution<select name="item" required><option value="">Choose a moment</option>${(available?.items ?? []).map((p: any) => `<option value="${escape(p.id)}">${escape(p.title)}</option>`).join("")}</select></label><button ${available ? "" : "disabled"}>Feature publicly</button></form>${available ? "" : "<p>The source is unavailable. Existing private or unavailable items stay hidden.</p>"}` : ""}<h2>Add your own card</h2><form id="manual"><label>Title<input name="title" maxlength="100" required></label><label>Description<textarea name="description" maxlength="240"></textarea></label><label>Destination<input name="url" type="url" placeholder="https://" required></label><button>Add a draft</button></form><h2>Arrange the collection</h2><div id="cards" data-base="${base}" data-source="${escape(BUILD_SHA)}" data-target="${escape(u.origin + base)}">${currentCards.map((card: any) => {const c={...card,...(savedStyles[card.id]??{pinned:false,icon:'link'})};return `<article data-card="${escape(c.id)}"><h3>${escape(c.title)}</h3><p>${escape(c.status)} · ${c.provider ? "Linked source contribution · content follows its source" : "Your authored card"}</p>${c.provider ? "" : `<details class="card-editor"><summary>Edit this link</summary><form data-edit-card data-link-snapshot="${escape(JSON.stringify({title:c.title,description:c.description,url:c.url,status:c.status}))}"><label>Card title<input name="title" maxlength="100" value="${escape(c.title)}" required></label><label>Card description<textarea name="description" maxlength="240">${escape(c.description)}</textarea></label><label>Card destination<input name="url" type="url" pattern="https://.*" value="${escape(c.url)}" required></label><p class="small">Use a public HTTPS link. Saving keeps the visibility you select below.</p><label>Visibility<select name="status">${["draft","published","hidden"].map(status=>`<option value="${status}" ${c.status===status?"selected":""}>${status}</option>`).join("")}</select></label><div class="row"><button type="submit">Save card</button><button type="button" class="secondary" data-preview-card>Preview without saving</button></div><div class="card-draft-preview" data-card-preview hidden><p class="small">Preview · not saved</p><a target="_blank" rel="noopener noreferrer"><strong></strong><span></span><small></small></a></div><p data-edit-message role="status" aria-live="polite"></p></form></details>`}${styleForm(c)}<div class="row card-actions"><button type="button" data-move="up" class="secondary">Move up</button><button type="button" data-move="down" class="secondary">Move down</button><button type="button" data-status="published" class="secondary">Publish</button><button type="button" data-status="hidden" class="secondary">Hide</button><button type="button" data-delete="true" class="secondary">Remove</button></div></article>`;}).join("")}</div>${achievementStudio(achievements)}${tagStudio(tags)}${client(base, "showcase_session")}<script type="module" src="${base}/brand/collection-studio.js"></script>`,
           base,
           "showcase",
           String(config.theme),
           String(config.intro),
           env.PUBLIC_ORIGIN,
           path,
-          env.PROVIDER_ORIGIN,
+          providerOrigin,
         );
       }
       if (path === "/") {
@@ -425,21 +424,21 @@ const app = {
         const tagSection=await readTags(env.DB).then(saved=>publicTags(saved.collection,base)).catch(()=>'');
         const profileLinks=profileFields.filter(field=>field.key!=='handle'&&!field.image&&config[field.key]).map(field=>`<a href="${escape(config[field.key])}" rel="me noopener noreferrer">${field.label}${icon('arrow')}</a>`).join('');
         const profileIdentity=config.handle?`<p class="profile-handle">@${escape(config.handle)}</p>`:'';
-        const savedInvitation=await contribution(env);
-        const contributionHTML=contributionSection(savedInvitation.invitation,value=>invitationHref(env,value,base));
+        const savedInvitation=providerOrigin ? await contribution(env) : null;
+        const contributionHTML=contributionSection(savedInvitation?.invitation ?? null,value=>invitationHref(env,value,base));
         const share=`<div class="profile-share"><button type="button" class="secondary" data-share-profile hidden>Share profile</button><button type="button" class="secondary" data-copy-profile hidden>Copy profile link</button><p role="status" aria-live="polite" data-share-status></p><label data-share-fallback hidden>Published profile URL<input readonly value="${escape(new URL(env.PUBLIC_ORIGIN).origin+base+'/')}"></label></div><script type="module" src="${base}/brand/profile-share.js"></script>`;
-        const href=(c:any)=>cardDestination(c,base,env.PROVIDER_MOUNT);
+        const href=(c:any)=>cardDestination(c,base,env.PROVIDER_MOUNT ?? "/guestbook");
         const cardMarkup=(c:any)=>config.layout==='compact'?`<article data-gallery-item data-kind="${c.provider?'photo':'link'}"><a class="compact-link" href="${escape(href(c))}"><span class="link-symbol">${icon(c.icon)}</span><span class="compact-copy"><span class="compact-title">${escape(c.title)}</span>${c.description?`<span class="compact-description">${escape(c.description)}</span>`:''}<span class="compact-destination">${escape(new URL(c.url).hostname)}${c.pinned?' · Pinned':''}</span></span><span class="link-direction">${icon('arrow')}</span></a></article>`:`<article data-gallery-item data-kind="${c.provider?'photo':'link'}"><a href="${escape(href(c))}">${c.image?`<img src="${escape(c.image)}" alt="${escape(c.title)}" width="1200" height="900" loading="lazy">`:`<div class="link-preview"><span class="link-symbol">${icon(c.icon)}</span><strong>${escape(new URL(c.url).hostname)}</strong></div>`}<h3>${escape(c.title)}</h3></a><p>${escape(c.description)}</p><span class="badge">${c.pinned?'Pinned · ':''}${c.provider?'Live source contribution':'Curated link'}</span></article>`;
         return html(
           String(config.title),
-          config.layout==='profile'?creatorProfile(config,resolved,base,share,tagSection,achievementSection,href,contributionHTML):`<section class="collection-hero" aria-labelledby="collection-title"><div class="collection-copy"><p class="collection-kicker">Linkarooie · Curated collection</p><h1 id="collection-title">${escape(config.title)}</h1>${profileIdentity}<p class="lede">${escape(config.intro)}</p>${profileLinks?`<nav class="profile-social" aria-label="Profile links">${profileLinks}</nav>`:''}<div class="collection-actions"><a class="button" href="#collection">Explore the collection</a><a href="${base}/owner">Curate this collection</a></div><p class="collection-note">Up to eight picks, arranged by the owner.</p>${share}</div><figure><img class="collection-art" src="${base}/brand/linkarooie-art-20261018-960.webp" srcset="${base}/brand/linkarooie-art-20261018-480.webp 480w, ${base}/brand/linkarooie-art-20261018-960.webp 960w" sizes="(max-width: 820px) calc(100vw - 40px), (max-width: 1248px) 50vw, 584px" width="960" height="960" fetchpriority="high" alt="A lime kangaroo selects an orange cassette beside a handheld game and notebook in a purple workshop."><figcaption>Original illustration for Linkarooie. The collection below holds the published links and moments.</figcaption></figure></section>${contributionHTML}${tagSection}<section class="collection-section" id="collection" aria-labelledby="picks-title"><div class="collection-heading"><h2 id="picks-title">Worth a closer look</h2>${resolved.length ? "<p>Follow a link. Open a moment.</p>" : ""}</div>${resolved.length > 1 ? `<div class="gallery-controls"><label>Find in this collection<input id="gallery-search" type="search" placeholder="Caption, title or alias" autocomplete="off"></label><label>Show<select id="gallery-type" aria-label="Show"><option value="">Photos and links</option><option value="photo">Photos</option><option value="link">Links</option></select></label></div><p id="gallery-count" class="small" role="status" aria-live="polite"></p><p id="gallery-empty" class="gallery-empty" hidden>No items match. Try another search or show photos and links.</p>` : ""}<div class="gallery ${escape(config.layout)}">${resolved.map(cardMarkup).join("") || '<div class="collection-empty"><h3>No published links yet</h3><p>The owner can publish a link or feature an approved photo. Draft and unavailable items stay out of this collection.</p></div>'}</div></section>${achievementSection}<aside class="collection-context"><p>A reading list, a tiny portfolio or the eight things you keep recommending. Links are chosen here; photos come from <a href="${base ? "/guestbook/" : "https://guestbook.loftwah.com/"}">Here / there</a> and remain subject to its current approval.</p></aside>`,
+          config.layout==='profile'?creatorProfile(config,resolved,base,share,tagSection,achievementSection,href,contributionHTML):`<section class="collection-hero" aria-labelledby="collection-title"><div class="collection-copy"><p class="collection-kicker">Linkarooie · Curated collection</p><h1 id="collection-title">${escape(config.title)}</h1>${profileIdentity}<p class="lede">${escape(config.intro)}</p>${profileLinks?`<nav class="profile-social" aria-label="Profile links">${profileLinks}</nav>`:''}<div class="collection-actions"><a class="button" href="#collection">Explore the collection</a><a href="${base}/owner">Curate this collection</a></div><p class="collection-note">Up to eight picks, arranged by the owner.</p>${share}</div><figure><img class="collection-art" src="${base}/brand/linkarooie-art-20261018-960.webp" srcset="${base}/brand/linkarooie-art-20261018-480.webp 480w, ${base}/brand/linkarooie-art-20261018-960.webp 960w" sizes="(max-width: 820px) calc(100vw - 40px), (max-width: 1248px) 50vw, 584px" width="960" height="960" fetchpriority="high" alt="A lime kangaroo selects an orange cassette beside a handheld game and notebook in a purple workshop."><figcaption>Original illustration for Linkarooie. The collection below holds the published links and moments.</figcaption></figure></section>${contributionHTML}${tagSection}<section class="collection-section" id="collection" aria-labelledby="picks-title"><div class="collection-heading"><h2 id="picks-title">Worth a closer look</h2>${resolved.length ? "<p>Follow a link. Open a moment.</p>" : ""}</div>${resolved.length > 1 ? `<div class="gallery-controls"><label>Find in this collection<input id="gallery-search" type="search" placeholder="Caption, title or alias" autocomplete="off"></label><label>Show<select id="gallery-type" aria-label="Show"><option value="">Photos and links</option><option value="photo">Photos</option><option value="link">Links</option></select></label></div><p id="gallery-count" class="small" role="status" aria-live="polite"></p><p id="gallery-empty" class="gallery-empty" hidden>No items match. Try another search or show photos and links.</p>` : ""}<div class="gallery ${escape(config.layout)}">${resolved.map(cardMarkup).join("") || '<div class="collection-empty"><h3>No published links yet</h3><p>The owner can publish a link from the collection studio.</p></div>'}</div></section>${achievementSection}`,
           base,
           "showcase",
           String(config.theme),
           String(config.intro),
           env.PUBLIC_ORIGIN,
           path,
-          env.PROVIDER_ORIGIN,
+          providerOrigin,
           config,
         );
       }

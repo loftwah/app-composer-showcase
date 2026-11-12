@@ -2,9 +2,9 @@ import { linkedCardContent } from "./card-view.ts";
 // A source reference chooses records inside the one configured app binding.
 // It never supplies an origin, request header, account or execution authority.
 export interface ProviderEnvironment {
-  ITEM_PROVIDER: Fetcher;
-  PROVIDER_ORIGIN: string;
-  PROVIDER_ID: string;
+  ITEM_PROVIDER?: Fetcher;
+  PROVIDER_ORIGIN?: string;
+  PROVIDER_ID?: string;
   PROVIDER_BASE?: string;
   PROVIDER_MOUNT?: string;
 }
@@ -100,7 +100,7 @@ export function storedSource(row: Row): ResourceSource | undefined {
 }
 
 export function providerLocation(env: ProviderEnvironment) {
-  const origin = new URL(env.PROVIDER_ORIGIN);
+  const origin = new URL(env.PROVIDER_ORIGIN ?? "");
   const base = env.PROVIDER_BASE ?? "";
   if (
     origin.protocol !== "https:" ||
@@ -124,6 +124,8 @@ async function readProvider(
   path: string,
   source?: ResourceSource,
 ): Promise<Row | null> {
+  if (!env.ITEM_PROVIDER || !env.PROVIDER_ORIGIN || !env.PROVIDER_ID)
+    return null;
   if (source && env.PROVIDER_ID !== "guestbook") return null;
   const { origin, base } = providerLocation(env);
   const response = await env.ITEM_PROVIDER.fetch(
@@ -150,7 +152,9 @@ function eligibleItem(
   source?: ResourceSource,
 ): ProviderItem | null {
   const item = record(value);
+  const provider = env.PROVIDER_ID;
   if (
+    !provider ||
     !item ||
     item.contract !== 1 ||
     item.provider !== env.PROVIDER_ID ||
@@ -191,7 +195,7 @@ function eligibleItem(
     return null;
   return {
     contract: 1,
-    provider: env.PROVIDER_ID,
+    provider,
     id: item.id,
     title: item.title,
     description: item.description,

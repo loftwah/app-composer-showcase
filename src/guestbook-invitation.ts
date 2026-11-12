@@ -126,7 +126,7 @@ export async function readGuestbookInvitation(
   env: ProviderEnvironment,
   source: ResourceSource,
 ): Promise<GuestInvitation | null> {
-  if (env.PROVIDER_ID !== 'guestbook') return null;
+  if (env.PROVIDER_ID !== 'guestbook' || !env.ITEM_PROVIDER || !env.PROVIDER_ORIGIN) return null;
   const { origin, base } = providerLocation(env);
   let response: Response;
   try {

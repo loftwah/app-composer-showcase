@@ -22,6 +22,10 @@ Contributions: [Contributing](CONTRIBUTING.md), [Code of Conduct](CODE_OF_CONDUC
 
 Public collections include search, photo/link filters, destination previews and a clear app explanation. Reviewed 17 October 2026: search and its status appear only when more than one item is published, the count stays silent until someone types or filters, and the jump nav disappears when there is nothing to jump to, so no control implies content. Navigation uses original app thumbnails and retains Composer's theme/links when mounted; standalone themes remain app-owned. The invited studio and current-source visibility checks are unchanged.
 
+## Run a link-only profile
+
+A new Linkarooie deployment can serve and manage curated links without Guestbook. Omit the \`ITEM_PROVIDER\` binding and \`PROVIDER_*\` variables. Connect an authorised Here / there Worker only to feature approved contributions or invite postcards.
+
 ## Health and optional usage
 
 Reviewed 14 October 2026. `GET /healthz` (or the declared mount plus `/healthz`) returns public liveness and exact source revision. It does not query storage, inspect credentials or prove a full user journey. `HEAD` is supported; other methods return 405.
