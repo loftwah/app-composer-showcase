@@ -138,6 +138,8 @@ if (cards) {
         ["feature", "published"],
     ]) {
         const entry = document.querySelector("#" + id);
+        if (!entry)
+            continue;
         watch(entry, id === "manual" ? ["title", "description", "url"] : ["item"]);
         const matchesSource = (value, raw) => {
             try {

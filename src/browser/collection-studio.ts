@@ -173,7 +173,8 @@ if (cards) {
     ["manual", "draft"],
     ["feature", "published"],
   ]) {
-    const entry = document.querySelector<HTMLFormElement>("#" + id)!;
+    const entry = document.querySelector<HTMLFormElement>("#" + id);
+    if (!entry) continue;
     watch(entry, id === "manual" ? ["title", "description", "url"] : ["item"]);
     const matchesSource = (value: unknown, raw: string) => {
       try {
