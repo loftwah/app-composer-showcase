@@ -325,7 +325,11 @@ test("public proof has an honest zero state", async () => {
     );
     const body = await (await call(db, "/")).text();
     assert.match(body, /data-usage-block/);
-    assert.match(body, /No counts were recorded in this window\./);
+    assert.match(body, /No counts were recorded in this complete-day window\./);
+    assert.match(
+      body,
+      /Today's activity is recorded but appears after the UTC day ends\./,
+    );
   } finally {
     sqlite.close();
   }
