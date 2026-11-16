@@ -241,6 +241,12 @@ test("reports include complete UTC days only and keep per-link totals to publish
     assert.equal(week.days[0].day, "2026-11-09");
     assert.equal(week.days.at(-1).day, "2026-11-15");
     assert.equal(week.days.some((day) => day.day === "2026-11-16"), false);
+    assert.deepEqual(week.today, {
+      day: "2026-11-16",
+      profileOpens: 9,
+      linkActions: 0,
+      shareActions: 0,
+    });
     assert.deepEqual(week.links, [{ id: "published-card", title: "Published link", count: 4 }]);
     assert.doesNotMatch(JSON.stringify(week.links), /PRIVATE DRAFT LINK|draft-card/);
     assert.match(week.definition, /Counted requests\/actions, not people/);
@@ -357,6 +363,8 @@ test("owner analytics needs a session and settings use same-origin compare-and-s
     assert.match(ownerPage, /data-usage-settings/);
     assert.match(ownerPage, /Published link/);
     assert.match(ownerPage, /usage-studio\.js/);
+    assert.match(ownerPage, /data-usage-today/);
+    assert.match(ownerPage, /Today so far, partial and not in this window/);
 
     const settings = (body, headers = { Origin: origin, ...owner }) =>
       call(db, "/api/usage", { method: "POST", headers, body });

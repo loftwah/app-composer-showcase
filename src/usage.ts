@@ -32,6 +32,7 @@ export interface UsageReport {
   settings: UsageSettings;
   window: UsageWindow;
   totals: UsageTotals & { shareActions: number };
+  today: UsageDay;
   days: UsageDay[];
   links: UsageLink[];
   definition: string;
@@ -286,6 +287,21 @@ export async function usageReport(
       totals.shareActions += count;
     }
   }
+  // Today is excluded from the complete-day window, but the owner still needs
+  // to see that recording is working. This partial day is never public.
+  const today = emptyDay(usageDay(now));
+  const { results: todayRows } = await db
+    .prepare(
+      "SELECT kind,SUM(count) AS n FROM usage_daily WHERE day=? GROUP BY kind",
+    )
+    .bind(today.day)
+    .all<{ kind: UsageKind; n: number }>();
+  for (const row of todayRows) {
+    const count = Number(row.n ?? 0);
+    if (row.kind === "profile_open") today.profileOpens += count;
+    else if (row.kind === "link_action") today.linkActions += count;
+    else today.shareActions += count;
+  }
   const { results: cards } = await db
     .prepare(
       "SELECT id,title FROM cards WHERE status='published' ORDER BY position,id LIMIT 64",
@@ -314,6 +330,7 @@ export async function usageReport(
     settings,
     window,
     totals,
+    today,
     days: series,
     links,
     definition: usageDefinition,
