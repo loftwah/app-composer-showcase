@@ -10,9 +10,10 @@ if(canonical){
   const copy=container.querySelector('[data-page-copy],[data-copy-profile]'),share=container.querySelector('[data-page-native],[data-share-profile]'),output=container.querySelector('[data-share-status]'),fallback=container.querySelector('[data-share-fallback]');
   if(!copy||!share||!output||!fallback)continue;
   fallback.querySelector('input').value=published;container.hidden=false;copy.hidden=false;
-  copy.addEventListener('click',async()=>{copy.disabled=true;try{await navigator.clipboard.writeText(published);output.textContent='Link copied.';fallback.hidden=true;}catch{fallback.hidden=false;const input=fallback.querySelector('input');input.focus();input.select();output.textContent='Copy the selected page URL using your browser.';}finally{copy.disabled=false;}});
+  const recorded=method=>container.dispatchEvent(new CustomEvent('linkarooie:share',{bubbles:true,detail:{method}}));
+  copy.addEventListener('click',async()=>{copy.disabled=true;try{await navigator.clipboard.writeText(published);output.textContent='Link copied.';fallback.hidden=true;recorded('copy');}catch{fallback.hidden=false;const input=fallback.querySelector('input');input.focus();input.select();output.textContent='Copy the selected page URL using your browser.';}finally{copy.disabled=false;}});
   if(typeof navigator.share==='function'){
-   share.hidden=false;share.addEventListener('click',async()=>{share.disabled=true;try{await navigator.share({title,text:description,url:published});output.textContent='';}catch(error){if(error?.name!=='AbortError'){fallback.hidden=false;output.textContent='Sharing is unavailable here. Copy the page link below.';}}finally{share.disabled=false;}});
+   share.hidden=false;share.addEventListener('click',async()=>{share.disabled=true;try{await navigator.share({title,text:description,url:published});output.textContent='';recorded('native');}catch(error){if(error?.name!=='AbortError'){fallback.hidden=false;output.textContent='Sharing is unavailable here. Copy the page link below.';}}finally{share.disabled=false;}});
   }
  }
 }

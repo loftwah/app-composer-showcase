@@ -4,7 +4,7 @@ Linkarooie publishes a small creator profile and curated collection: write links
 
 [Development commands and checked source ownership](ENGINEERING.md).
 
-`pnpm install --frozen-lockfile; pnpm check; pnpm dev`. Deployment: provision isolated D1, apply `migrations/0001.sql`, set `OWNER_API_TOKEN` with Wrangler secret input, then `pnpm deploy`. No GitHub Actions. Secrets never belong in source.
+`pnpm install --frozen-lockfile; pnpm check; pnpm dev`. Deployment: provision isolated D1, apply the forward migrations in `migrations/` in order, set `OWNER_API_TOKEN` with Wrangler secret input, then `pnpm deploy`. No GitHub Actions. Secrets never belong in source.
 
 Versioned app contract: `app.manifest.json`. Linkarooie **consumes** Guestbook’s contract-1 `/api/items` and `/api/items/:id` provider API. It checks current public approval each time a linked moment is resolved. Here / there owns the media and moderation; this repository owns the curated cards and profile, and grants no provider moderation rights. A downloaded public copy cannot be recalled.
 
@@ -36,6 +36,22 @@ The launch operator enables its own instances through Wrangler secrets; do not c
 
 Add `?vitals=1` to the public page, then open “Page performance” for local LCP/INP/CLS measurements. Values apply to this load only; unsupported metrics say unavailable. The self-hosted standard `web-vitals` 6.2.3 bundle and Apache licence/provenance are retained. No values, element attribution or page data are uploaded or persisted. Developer console links stay public and do not print app contents.
 
+## Opt-in usage proof
+
+Reviewed 16 November 2026. Usage recording is off by default and stores only aggregate counts. It is not a visitor tracker, has no third-party service and does not consult a consent signal. It is separate from the optional server-only publisher above: the two do not share storage or settings, and disabling one does not disable the other. Apply forward migration `0004_usage.sql` before release. Its two tables hold one UTC day, an allowlisted kind, a bounded public key and an integer count, plus one disabled settings row. No column can hold an IP address, user agent, referrer, cookie, session, visitor identifier, raw URL or query string, and this feature does not log request metadata.
+
+Owner `GET /api/usage?window=7|30|90` requires the owner session and returns only complete UTC days (today is excluded until it ends): profile opens, link actions, share actions, currently published per-link totals, a per-day series, window boundaries and explicit definitions/quality notes. `POST /api/usage` is owner-only and same-origin; `{enabled, publicBlock, expected:{enabled, publicBlock}}` compare-and-swaps the saved row and refuses a public proof while recording is disabled. The studio panel shows totals, top links, an accessible daily table with simple inline bars, the exact definition, an empty state and saved/failed toggle states.
+
+`POST /api/usage/action` accepts at most 1 KiB of JSON from the same origin and only a published card id for `link_action` or an allowlisted `copy`/`native`/`download` method for `share_action`. Unknown kinds, unpublished or removed cards, unlisted methods and extra fields are ignored with 204; malformed JSON returns 400 and an oversized body 413. One UPSERT increments the row, gated on recording being enabled and (for links) the card still being published, and stops at 100,000 per day, kind and key. Storage failure still returns 204, so the endpoint never blocks navigation.
+
+The public homepage counts one `profile_open` per successful HTML render only when all of these hold: GET, document destination when `Sec-Fetch-Dest` is present, not an automated user agent that identifies itself, not a synthetic `X-Composer-Verification: 1` probe, and a 200 HTML response. Owner studio, API, asset, member-profile, bot-prefetch, HEAD and error responses are excluded. Because this is a request count, a reload counts again; the owner's own visits count too unless an automated-agent rule applies, and some automation may still be counted while some real traffic may be missed.
+
+The optional public proof renders only when recording and the public block are both enabled. It shows **Recorded profile visits** and **Recorded link actions** for the last 30 complete UTC days, the exact definition “Counted requests/actions, not people”, the window and a zero state. It never shows share actions, per-link rankings, draft/private cards or visitor information. Withdrawal (`publicBlock` off) removes the section and returns 404 from `GET /api/usage/public`; owner totals remain.
+
+Client beacons run only while recording is enabled. A primary (unmodified) activation of a published card link sends its card id; a successful copy or native share sends only the method. Middle-click/modified activation, prefetch, cancelled native share and the destination URL are never sent. `navigator.sendBeacon` is used with a `fetch(..., {keepalive:true})` fallback, failures are silent, and navigation is never delayed or prevented. No local opt-out is added.
+
+Limits: this is directional evidence, not unique visitors, conversion, revenue or per-person journeys. It cannot identify returning readers, does not read Do Not Track or Global Privacy Control, skips link/share actions when JavaScript is unavailable, depends on the browser sending a same-origin `Origin` on POST, and has no automatic retention or deletion job. Turning recording off stops new counts; withdrawal hides only the public proof. [Full contract](docs/usage-proof.md).
+
 Original editorial presentation, reviewed 14 October 2026: app-specific illustrated hero and sharing artwork, responsive 480/960px WebP sources, reserved image dimensions, clear collection/story sections and native browse/contribute actions. Illustration is labelled separately from published contributions. Mounted social URLs resolve inside the app mount. Owner titles, introductions, layouts, moderation, data and configuration contracts are preserved. Asset provenance and optimisation are recorded beside each derivative.
 
 The protected collection studio edits existing authored titles, descriptions and HTTPS destinations, previews unsaved cards without network fetching, and saves with explicit visibility. Source-backed photo content stays owned by its provider. Reordering waits for a successful server response before changing the visible order; failures leave the current order intact.
@@ -46,7 +62,7 @@ Reviewed 15 October 2026. The title and introduction become the profile name and
 
 Choose compact layout for a text-first collection, or retain the existing gallery/editorial layouts. Each current card has an independent fixed icon and pin control. Pinned public cards come first while original position/id order remains stable inside each group. Private and revoked cards remain excluded. Saving a link style changes neither its content nor publication state. The existing private export includes those fields. All records stay in this app's D1; no schema migration is needed.
 
-Sharing uses the published server canonical URL with native share where available, then clipboard/manual-copy recovery. Cancelled native sharing records no success or conversion. No external destination is fetched for previews, and no visitor/action tracker was added. Exact source references, reuse and deferred features are in [the provenance matrix](docs/linkarooie-provenance.md).
+Sharing uses the published server canonical URL with native share where available, then clipboard/manual-copy recovery. Cancelled native sharing records no success or conversion. No external destination is fetched for previews. The narrow opt-in aggregate usage proof above is the only request/action counting; no third-party visitor tracker was added. Exact source references, reuse and deferred features are in [the provenance matrix](docs/linkarooie-provenance.md).
 
 ## Guarded owner link edits
 

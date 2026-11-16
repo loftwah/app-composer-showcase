@@ -18,5 +18,6 @@
   "owner.js": "public/brand/owner.js",
   "share-image.mjs": "public/brand/share-image.mjs",
   "share-image.d.mts": "public/brand/share-image.d.mts",
-  "share-card-studio.js": "public/brand/share-card-studio.js"
+  "share-card-studio.js": "public/brand/share-card-studio.js",
+  "usage-studio.js": "public/brand/usage-studio.js"
 }

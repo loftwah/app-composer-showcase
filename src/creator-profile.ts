@@ -11,6 +11,7 @@ export function creatorProfile(
   achievements: string,
   href: (card: any) => string,
   contribution: string,
+  usage = false,
 ) {
   const image = (value: unknown) => {
     try {
@@ -41,7 +42,7 @@ export function creatorProfile(
     }))
     .filter((group) => group.cards.length);
   const link = (card: any, feature = false, index = 0) =>
-    `<article data-gallery-item data-gallery-id="${escape(card.id)}" data-kind="${card.provider ? "photo" : "link"}"><a class="creator-link ${feature ? "creator-pick" : ""}" href="${escape(href(card))}" rel="noopener noreferrer">${card.image ? `<img class="creator-link-image" src="${escape(card.image)}" alt="" width="96" height="96" loading="lazy">` : `<span class="creator-link-icon">${icon(card.icon)}</span>`}<span class="creator-link-copy"><strong>${escape(card.title)}</strong>${card.description ? `<span>${escape(card.description)}</span>` : ""}<small>${escape(new URL(card.url).hostname)}</small></span><span class="creator-link-end">${feature ? `<span class="pick-number">${String(index + 1).padStart(2, "0")}</span>` : ""}${icon("arrow")}</span></a></article>`;
+    `<article data-gallery-item data-gallery-id="${escape(card.id)}" data-kind="${card.provider ? "photo" : "link"}"><a class="creator-link ${feature ? "creator-pick" : ""}" href="${escape(href(card))}" rel="noopener noreferrer"${usage ? ` data-usage-card="${escape(card.id)}"` : ""}>${card.image ? `<img class="creator-link-image" src="${escape(card.image)}" alt="" width="96" height="96" loading="lazy">` : `<span class="creator-link-icon">${icon(card.icon)}</span>`}<span class="creator-link-copy"><strong>${escape(card.title)}</strong>${card.description ? `<span>${escape(card.description)}</span>` : ""}<small>${escape(new URL(card.url).hostname)}</small></span><span class="creator-link-end">${feature ? `<span class="pick-number">${String(index + 1).padStart(2, "0")}</span>` : ""}${icon("arrow")}</span></a></article>`;
   const socials = profileFields
     .filter(
       (field) => field.key !== "handle" && !field.image && config[field.key],
