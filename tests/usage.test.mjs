@@ -347,7 +347,8 @@ test("owner analytics needs a session and settings use same-origin compare-and-s
     sqlite
       .prepare("INSERT INTO cards(id,title,description,url,position,status) VALUES(?,?,?,?,?,?)")
       .run("published-card", "Published link", "", "https://example.test/", 0, "published");
-    seed(sqlite, "2026-11-15", "link_action", "published-card", 2);
+    const inWindow = new Date(Date.now() - 2 * 86400000).toISOString().slice(0, 10);
+    seed(sqlite, inWindow, "link_action", "published-card", 2);
     assert.equal((await call(db, "/api/usage")).status, 401);
     assert.equal((await call(db, "/api/usage?window=30", { headers: { Authorization: "Bearer wrong" } })).status, 401);
     const report = await call(db, "/api/usage?window=7", { headers: owner });
